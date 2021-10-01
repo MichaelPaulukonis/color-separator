@@ -7,7 +7,7 @@ const routerBase = {
 
 export default {
   ...routerBase,
-  mode: 'spa',
+  ssr: false,
   /*
   ** Headers of the page
   */
@@ -21,6 +21,13 @@ export default {
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
     ]
+    // script: [
+    //   {
+    //     src: 'p5.riso.js',
+    //     body: true,
+    //     bodyAppend: true
+    //   }
+    // ]
   },
   /*
   ** Customize the progress-bar color

@@ -17,6 +17,7 @@
       // Our sketch will go here!
     noscript
       p JavaScript is required to view the contents of this page.
+  
 </template>
 
 <script>
@@ -42,18 +43,34 @@ export default {
       textManager: {}
     }
   },
+  head() {
+      // return {
+      //   script: [
+      //     {
+      //       src: 'p5.riso.js',
+      //       body: true,
+      //       bodyAppend: true
+      //     }
+      //   ]
+      // }
+    },
   mounted () {
     const keypress = require('keypress.js')
 
-    // TODO: switch over to https://craig.is/killing/mice
-    // currently using in SUCCULENT
-
     const builder = (p5Instance) => {
-      const colorSep = new Sketch({ p5Instance }) // eslint-disable-line no-new
+      const colorSep = new Sketch({ p5Instance, p5Object: P5 }) // eslint-disable-line no-new
       this.colorSep = colorSep
     }
 
     new P5(builder, 'sketch-holder') // eslint-disable-line no-new
+
+    if (process.browser) {
+      let recaptchaScript = document.createElement('script')
+      recaptchaScript.setAttribute('src', 'p5.riso.js')
+      recaptchaScript.setAttribute('id', 'mounted')
+      document.body.appendChild(recaptchaScript)
+    }
+
   },
   methods: {
     setFocus () {

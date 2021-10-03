@@ -1,43 +1,65 @@
-import saveAs from 'file-saver'
-import { datestring, filenamer } from './filelib'
+// import saveAs from 'file-saver'
+// import { datestring, filenamer } from './filelib'
 
-let namer = null
+// const namer = null
 
 export default function Sketch ({ p5Instance: p5, p5Object }) {
-  const colorSep = {}
-  const density = 2
-  const params = {
-    width: 500,
-    height: 500
-  }
+  let blue
+  let yellow
+  let red
 
   p5.preload = () => {
     console.log('here!')
     window._p5Instance = p5Object// for p5.riso
-  }
-
-  p5.setup = () => {
-    p5.pixelDensity(density)
-    // TODO: so, you were wondering why there were too many canvases? !!!
-    p5.createCanvas(params.width, params.height)
-    p5.background('white')
-    namer = filenamer('color-sep.' + datestring())
     window.slowDown()
   }
 
-  const saver = (canvas, name) => {
-    canvas.toBlob(blob => saveAs(blob, name))
+  p5.setup = function () {
+    // Set up a global object to capture this instance.
+    window._p5Instance = p5
+    p5.createCanvas(600, 600)
+    p5.pixelDensity(1)
+    p5.noStroke()
+
+    red = new Riso('red')
+    blue = new Riso('blue')
+    yellow = new Riso('yellow')
+
+    p5.colorGrid(red, 0)
+    p5.colorGrid(yellow, 90)
+    p5.colorGrid(blue, 270)
+
+    drawRiso()
   }
 
-  const savit = ({ params }) => {
-    console.log('saving canvas: ')
-    saver(colorSep.layers.p5.drawingContext.canvas, namer() + '.png')
+  p5.draw = function () {}
+
+  p5.mouseClicked = function () {
+    exportRiso()
   }
 
-  p5.draw = () => {
+  p5.colorGrid = function (layer, angle) {
+    deg = angle * (p5.PI / 180)
+    layer.push()
+    layer.translate(299, 299)
+    layer.rotate(deg)
+    layer.translate(-299, -299)
+    // GRID
+    layer.noStroke()
+    for (let x = 0; x < 20; x++) {
+      for (let y = 0; y < 20; y++) {
+        const a = p5.map(y, 0, 19, 255, 0)
+        const w = p5.map(x, 0, 20, 50, 550)
+        const h = p5.map(y, 0, 20, 50, 550)
+        layer.fill(a)
+        layer.rect(w, h, 23, 23)
+
+        // key
+        if (w > 510) { // only draw edge strip once
+          layer.rect(550 + 30, h, 23, 23)
+        }
+      }
+    }
+    layer.pop()
   }
-
-  colorSep.savit = savit
-
-  return colorSep
 }

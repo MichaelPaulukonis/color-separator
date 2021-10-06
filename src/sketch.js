@@ -8,7 +8,8 @@ export default function Sketch ({ p5Instance: p5, p5Object }) {
   const density = 2
   const params = {
     width: 500,
-    height: 500
+    height: 500,
+    currChannel: ''
   }
   let img = null
 
@@ -23,7 +24,6 @@ export default function Sketch ({ p5Instance: p5, p5Object }) {
     params.height = img.height
     p5.createCanvas(params.width, params.height)
     p5.background('white')
-    namer = filenamer('color-sep.' + datestring())
     p5.noLoop()
     p5.image(img, 0, 0)
 
@@ -35,10 +35,15 @@ export default function Sketch ({ p5Instance: p5, p5Object }) {
   p5.keyTyped = () => {
     const colors = ['r', 'g', 'b', 'c', 'y', 'm', 'k']
     if (colors.indexOf(p5.key) > -1) {
+      params.currChannel = p5.key
       oneChannel(img, p5.key)
     }
     if (p5.key === 'o') {
+      params.currChannel = 'original'
       oneChannel(img, p5.key)
+    }
+    if (p5.key === 's') {
+      savit()
     }
   }
 
@@ -58,9 +63,10 @@ export default function Sketch ({ p5Instance: p5, p5Object }) {
     canvas.toBlob(blob => saveAs(blob, name))
   }
 
-  const savit = ({ params }) => {
+  const savit = () => {
     console.log('saving canvas: ')
-    saver(colorSep.layers.p5.drawingContext.canvas, namer() + '.png')
+    namer = filenamer(`color-sep.${params.currChannel}.${datestring()}`)
+    saver(p5.drawingContext.canvas, namer() + '.png')
   }
 
   p5.draw = () => {

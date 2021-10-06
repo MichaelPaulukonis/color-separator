@@ -12,7 +12,7 @@ const datestring = () => {
 const filenamer = (prefix) => {
   let frame = 0
   return () => {
-    const name = `polychrometext.${prefix}-${String(frame).padStart(6, '0')}`
+    const name = `colorsep.${prefix}-${String(frame).padStart(6, '0')}`
     frame += 1
     return name
   }

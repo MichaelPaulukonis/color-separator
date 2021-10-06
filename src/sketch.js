@@ -10,19 +10,48 @@ export default function Sketch ({ p5Instance: p5, p5Object }) {
     width: 500,
     height: 500
   }
+  let img = null
 
   p5.preload = () => {
-    console.log('here!')
-    window._p5Instance = p5Object// for p5.riso
+    // img = p5.loadImage(require('~/assets/images/nancy.bubblegum.jpg'))
+    img = p5.loadImage(require('~/assets/images/sour_sweets05.jpg'))
   }
 
   p5.setup = () => {
     p5.pixelDensity(density)
-    // TODO: so, you were wondering why there were too many canvases? !!!
+    params.width = img.width
+    params.height = img.height
     p5.createCanvas(params.width, params.height)
     p5.background('white')
     namer = filenamer('color-sep.' + datestring())
-    window.slowDown()
+    p5.noLoop()
+    p5.image(img, 0, 0)
+
+    // const red = extractRGBChannel(img, 'red')
+    // const channel = extractCMYKChannel(img, 'k')
+    // p5.image(channel, 0, 0)
+  }
+
+  p5.keyTyped = () => {
+    const colors = ['r', 'g', 'b', 'c', 'y', 'm', 'k']
+    if (colors.indexOf(p5.key) > -1) {
+      oneChannel(img, p5.key)
+    }
+    if (p5.key === 'o') {
+      oneChannel(img, p5.key)
+    }
+  }
+
+  const oneChannel = (img, channel) => {
+    let extract = null
+    if (['r', 'g', 'b'].indexOf(channel) > -1) {
+      extract = extractRGBChannel(img, channel)
+    } else if (['c', 'y', 'm', 'k'].indexOf(channel) > -1) {
+      extract = extractCMYKChannel(img, channel)
+    } else {
+      extract = img
+    }
+    p5.image(extract, 0, 0)
   }
 
   const saver = (canvas, name) => {
@@ -54,18 +83,68 @@ export default function Sketch ({ p5Instance: p5, p5Object }) {
     return [c * 255, m * 255, y * 255, k * 255]
   }
 
-  const extractRGBChannel = (img, c) => {
-    if (c === 'r' || c === 'red') c = 0
-    if (c === 'g' || c === 'green') c = 1
-    if (c === 'b' || c === 'blue') c = 2
+  const cmyk2 = (r, g, b) => {
+    // RGB --> CMYK
+    let c = 1 - (r / 255)
+    let m = 1 - (g / 255)
+    let y = 1 - (b / 255)
+    let k = 1
+    if (c < k) {
+      k = c
+    }
+    if (m < k) {
+      k = m
+    }
+    if (y < k) {
+      k = y
+    }
+    c = (c - k) / (1 - k)
+    m = (m - k) / (1 - k)
+    y = (y - k) / (1 - k)
+    return [c * 255, m * 255, y * 255, k * 255]
+  }
 
-    const channel = createImage(img.width, img.height)
+  const extractRGBChannel = (img, ch) => {
+    let c = 0
+    if (ch === 'r') c = 0
+    if (ch === 'g') c = 1
+    if (ch === 'b') c = 2
+
+    let splits = []
+    switch (ch) {
+      case 'r':
+        c = 0
+        splits = [255, 0, 255]
+        break
+
+      case 'g':
+        c = 1
+        splits = [255, 255, 0]
+        break
+
+      case 'b':
+        c = 2
+        splits = [0, 255, 255]
+        break
+    }
+
+    const channel = p5.createImage(img.width, img.height)
     img.loadPixels()
     channel.loadPixels()
+    // cyan: 0, 255, 255
+    // magenta: 255, 0, 255
+    // yellow: 255, 255, 0
     for (let i = 0; i < img.pixels.length; i += 4) {
-      channel.pixels[i] = img.pixels[i + c]
-      channel.pixels[i + 1] = img.pixels[i + c]
-      channel.pixels[i + 2] = img.pixels[i + c]
+      // channel.pixels[i] = img.pixels[i + c]
+      // channel.pixels[i + 1] = img.pixels[i + c]
+      // channel.pixels[i + 2] = img.pixels[i + c]
+
+      // 0 channel needs to be normal
+      channel.pixels[i] = splits[0] === 0 ? img.pixels[i + c] : splits[0]
+      channel.pixels[i + 1] = splits[1] === 0 ? img.pixels[i + c] : splits[1]
+      channel.pixels[i + 2] = splits[2] === 0 ? img.pixels[i + c] : splits[2]
+
+      // meh, who cares about alpha
       channel.pixels[i + 3] = img.pixels[i + 3]
     }
     channel.updatePixels()
@@ -78,7 +157,7 @@ export default function Sketch ({ p5Instance: p5, p5Object }) {
     if (c === 'y' || c === 'yellow') c = 2
     if (c === 'k' || c === 'black') c = 3
 
-    const channel = createImage(img.width, img.height)
+    const channel = p5.createImage(img.width, img.height)
     img.loadPixels()
     channel.loadPixels()
     for (let i = 0; i < img.pixels.length; i += 4) {
@@ -86,6 +165,10 @@ export default function Sketch ({ p5Instance: p5, p5Object }) {
       const g = img.pixels[i + 1]
       const b = img.pixels[i + 2]
       const val = rgb2cmyk(r, g, b)[c]
+      const val2 = cmyk2(r, g, b)[c]
+      // if (val2 !== val) {
+      //   console.log(`1: ${val} 2: ${val2}`)
+      // }
       channel.pixels[i] = val
       channel.pixels[i + 1] = val
       channel.pixels[i + 2] = val

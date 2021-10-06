@@ -28,8 +28,6 @@ import About from '@/components/about'
 
 import Sketch from '@/src/sketch.js'
 
-const randElem = arr => arr[Math.floor(Math.random() * arr.length)]
-
 export default {
   components: {
     VModal,
@@ -43,17 +41,6 @@ export default {
       textManager: {}
     }
   },
-  head() {
-      // return {
-      //   script: [
-      //     {
-      //       src: 'p5.riso.js',
-      //       body: true,
-      //       bodyAppend: true
-      //     }
-      //   ]
-      // }
-    },
   mounted () {
     const keypress = require('keypress.js')
 
@@ -63,13 +50,6 @@ export default {
     }
 
     new P5(builder, 'sketch-holder') // eslint-disable-line no-new
-
-    if (process.browser) {
-      let recaptchaScript = document.createElement('script')
-      recaptchaScript.setAttribute('src', 'p5.riso.js')
-      recaptchaScript.setAttribute('id', 'mounted')
-      document.body.appendChild(recaptchaScript)
-    }
 
   },
   methods: {

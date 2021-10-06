@@ -16,4 +16,7 @@ and it's [example sketch](https://github.com/antiboredom/p5.riso/blob/master/tut
 
 - https://bgrins.github.io/TinyColor/
 - https://github.com/jtnimoy/p5.cmyk.js
-- 
+- https://levelup.gitconnected.com/notorious-rgb-756f19f3e462
+- <https://codegolf.stackexchange.com/questions/114408/extract-an-rgb-channel-of-an-image>
+
+- I ran the bubblegum image through an online CMYK extractor and got a clean (but TINY) image, so there seem to be some flaws in the algorithm

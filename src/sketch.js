@@ -104,27 +104,28 @@ export default function Sketch ({ p5Instance: p5, p5Object }) {
     return [c * 255, m * 255, y * 255, k * 255]
   }
 
-  const extractRGBChannel = (img, ch) => {
-    let c = 0
-    if (ch === 'r') c = 0
-    if (ch === 'g') c = 1
-    if (ch === 'b') c = 2
+  const extractRGBChannel = (img, targChnl) => {
+    let channelOffset = 0
+
+    const magenta = [255, 0, 255]
+    const yellow = [255, 255, 0]
+    const cyan = [0, 255, 255]
 
     let splits = []
-    switch (ch) {
+    switch (targChnl) {
       case 'r':
-        c = 0
-        splits = [255, 0, 255]
+        channelOffset = 1
+        splits = magenta
         break
 
       case 'g':
-        c = 1
-        splits = [255, 255, 0]
+        channelOffset = 2
+        splits = yellow
         break
 
       case 'b':
-        c = 2
-        splits = [0, 255, 255]
+        channelOffset = 0
+        splits = cyan
         break
     }
 
@@ -140,9 +141,9 @@ export default function Sketch ({ p5Instance: p5, p5Object }) {
       // channel.pixels[i + 2] = img.pixels[i + c]
 
       // 0 channel needs to be normal
-      channel.pixels[i] = splits[0] === 0 ? img.pixels[i + c] : splits[0]
-      channel.pixels[i + 1] = splits[1] === 0 ? img.pixels[i + c] : splits[1]
-      channel.pixels[i + 2] = splits[2] === 0 ? img.pixels[i + c] : splits[2]
+      channel.pixels[i] = splits[0] === 0 ? img.pixels[i + channelOffset] : splits[0]
+      channel.pixels[i + 1] = splits[1] === 0 ? img.pixels[i + channelOffset] : splits[1]
+      channel.pixels[i + 2] = splits[2] === 0 ? img.pixels[i + channelOffset] : splits[2]
 
       // meh, who cares about alpha
       channel.pixels[i + 3] = img.pixels[i + 3]

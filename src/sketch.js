@@ -1,5 +1,6 @@
 import saveAs from 'file-saver'
 import { datestring, filenamer } from './filelib'
+import colors from './colors'
 
 let namer = null
 
@@ -26,23 +27,25 @@ export default function Sketch ({ p5Instance: p5, p5Object }) {
     p5.background('white')
     p5.noLoop()
     p5.image(img, 0, 0)
-
-    // const red = extractRGBChannel(img, 'red')
-    // const channel = extractCMYKChannel(img, 'k')
-    // p5.image(channel, 0, 0)
   }
 
+  const colorKeys = ['r', 'g', 'b', 'c', 'y', 'm', 'k']
+
   p5.keyTyped = () => {
-    const colors = ['r', 'g', 'b', 'c', 'y', 'm', 'k']
-    if (colors.indexOf(p5.key) > -1) {
+    if (p5.key === 'a') {
+      const color = p5.random(Object.values(colors))
+      const extract = extractSingleColor({ img, targChnl: 'b', color })
+      p5.image(extract, 0, 0)
+    } else if (colorKeys.indexOf(p5.key) > -1) {
       params.currChannel = p5.key
       oneChannel(img, p5.key)
-    }
-    if (p5.key === 'o') {
+    } else if (p5.key === 'o') {
       params.currChannel = 'original'
       oneChannel(img, p5.key)
-    }
-    if (p5.key === 's') {
+    } else if (p5.key === 'd') {
+      const d = ditherImage(p5.get())
+      p5.image(d, 0, 0)
+    } else if (p5.key === 's') {
       savit()
     }
   }
@@ -51,6 +54,7 @@ export default function Sketch ({ p5Instance: p5, p5Object }) {
     let extract = null
     if (['r', 'g', 'b'].indexOf(channel) > -1) {
       extract = extractRGBChannel(img, channel)
+      // extract = extractSingleColor({ img, targChnl: channel })
     } else if (['c', 'y', 'm', 'k'].indexOf(channel) > -1) {
       extract = extractCMYKChannel(img, channel)
     } else {
@@ -110,6 +114,35 @@ export default function Sketch ({ p5Instance: p5, p5Object }) {
     return [c * 255, m * 255, y * 255, k * 255]
   }
 
+  const extractSingleColor = ({ img, targChnl, color }) => {
+    // const isWhite = ([r, g, b]) => r === 0 && g === 0 && b === 0
+    // Get the brightness value of the pixel
+    // const gray = brightness(pixel);
+    const min = 50
+    const threshold = ([r, g, b]) => {
+      const c = p5.color(r, g, b)
+      const gray = p5.brightness(c)
+      return gray < min
+    }
+    const channel = p5.createImage(img.width, img.height)
+    img.loadPixels()
+    channel.loadPixels()
+    for (let i = 0; i < img.pixels.length; i += 4) {
+      if (!threshold([img.pixels[i], img.pixels[i + 1], img.pixels[i + 2]])) {
+        channel.pixels[i] = 255
+        channel.pixels[i + 1] = 255
+        channel.pixels[i + 2] = 255
+      } else {
+        channel.pixels[i] = color[0]
+        channel.pixels[i + 1] = color[1]
+        channel.pixels[i + 2] = color[2]
+      }
+      channel.pixels[i + 3] = img.pixels[i + 3]
+    }
+    channel.updatePixels()
+    return channel
+  }
+
   const extractRGBChannel = (img, targChnl) => {
     let channelOffset = 0
 
@@ -135,6 +168,8 @@ export default function Sketch ({ p5Instance: p5, p5Object }) {
         break
     }
 
+    // splits = colors.GREEN
+
     const channel = p5.createImage(img.width, img.height)
     img.loadPixels()
     channel.loadPixels()
@@ -146,13 +181,22 @@ export default function Sketch ({ p5Instance: p5, p5Object }) {
       // channel.pixels[i + 1] = img.pixels[i + c]
       // channel.pixels[i + 2] = img.pixels[i + c]
 
+      // hrm. Extract color, then convert it to another color
+      // MATH!
+
       // 0 channel needs to be normal
       channel.pixels[i] = splits[0] === 0 ? img.pixels[i + channelOffset] : splits[0]
       channel.pixels[i + 1] = splits[1] === 0 ? img.pixels[i + channelOffset] : splits[1]
       channel.pixels[i + 2] = splits[2] === 0 ? img.pixels[i + channelOffset] : splits[2]
 
+      // channel.pixels[i] = splits[0]
+      // channel.pixels[i + 1] = splits[1]
+      // channel.pixels[i + 2] = splits[2]
+
       // meh, who cares about alpha
       channel.pixels[i + 3] = img.pixels[i + 3]
+      // channel.pixels[i + 3] =
+      //   255 - (img.pixels[i + channelOffset] + img.pixels[i + channelOffset] + img.pixels[i + channelOffset]) / 3
     }
     channel.updatePixels()
     return channel
@@ -172,10 +216,6 @@ export default function Sketch ({ p5Instance: p5, p5Object }) {
       const g = img.pixels[i + 1]
       const b = img.pixels[i + 2]
       const val = rgb2cmyk(r, g, b)[c]
-      const val2 = cmyk2(r, g, b)[c]
-      // if (val2 !== val) {
-      //   console.log(`1: ${val} 2: ${val2}`)
-      // }
       channel.pixels[i] = val
       channel.pixels[i + 1] = val
       channel.pixels[i + 2] = val

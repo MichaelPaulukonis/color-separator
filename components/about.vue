@@ -1,9 +1,9 @@
 <template lang="pug">
   div#about
-    h1 A multi-color (polychrome) text-painter by
+    h1 A color-channel extraction tool by
     h2 #[a(href='http://michaelpaulukonis.github.io') Michael Paulukonis]
 
-    h1#sources Source code: #[a(href='https://github.com/MichaelPaulukonis/polychrome.p5') GitHub]
+    h1#sources Source code: #[a(href='https://github.com/MichaelPaulukonis/color-separator.p5') GitHub]
 
     h3 More #[a(href='https://michaelpaulukonis.github.io/sketches/') Web Sketches]
 

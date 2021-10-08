@@ -20,3 +20,9 @@ and it's [example sketch](https://github.com/antiboredom/p5.riso/blob/master/tut
 - <https://codegolf.stackexchange.com/questions/114408/extract-an-rgb-channel-of-an-image>
 
 - I ran the bubblegum image through an online CMYK extractor and got a clean (but TINY) image, so there seem to be some flaws in the algorithm
+
+### monochrome 
+
+- https://codepen.io/mikeurbonas/pen/poJKKvB
+- https://stackoverflow.com/questions/39174195/how-to-re-tint-a-grayscale-image-on-canvas - global compositing 
+- https://surma.dev/things/ditherpunk/

@@ -73,13 +73,6 @@ export default {
     ]
   },
 
-  webfontloader: {
-    custom: {
-      families: ['Graphik', 'Tiempos Headline'],
-      urls: ['/fonts/fonts.css']
-    }
-  },
-
   /*
   ** Axios module configuration
   ** See https://axios.nuxtjs.org/options

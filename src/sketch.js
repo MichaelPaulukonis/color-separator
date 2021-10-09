@@ -10,23 +10,41 @@ export default function Sketch ({ p5Instance: p5, p5Object }) {
   const params = {
     width: 500,
     height: 500,
-    currChannel: ''
+    currChannel: '',
+    img: null,
+    imageLoaded: false
   }
-  let img = null
 
   p5.preload = () => {
-    // img = p5.loadImage(require('~/assets/images/nancy.bubblegum.jpg'))
-    img = p5.loadImage(require('~/assets/images/sour_sweets05.jpg'))
+    params.img = p5.loadImage(require('~/assets/images/sour_sweets05.jpg'))
   }
 
   p5.setup = () => {
     p5.pixelDensity(density)
-    params.width = img.width
-    params.height = img.height
-    p5.createCanvas(params.width, params.height)
+    params.width = params.img.width
+    params.height = params.img.height
+    const canvas = p5.createCanvas(params.width, params.height)
+    canvas.drop(gotFile)
+    canvas.parent('#sketch-holder')
     p5.background('white')
     p5.noLoop()
+    p5.image(params.img, 0, 0)
+  }
+
+  const imageReady = (img) => {
+    p5.resizeCanvas(img.width, img.height)
+    params.img.loadPixels()
     p5.image(img, 0, 0)
+    params.imageLoaded = true
+  }
+
+  const gotFile = (file) => {
+    if (file && file.type === 'image') {
+      params.imageLoaded = false
+      params.img = p5.loadImage(file.data, imageReady)
+    } else {
+      console.log('Not an image file!')
+    }
   }
 
   const colorKeys = ['r', 'g', 'b', 'c', 'y', 'm', 'k']
@@ -36,14 +54,14 @@ export default function Sketch ({ p5Instance: p5, p5Object }) {
       const channel = p5.random(['r', 'g', 'b'])
       console.log(`channel: ${channel}`)
       const color = p5.random(Object.values(colors))
-      const extract = extractSingleColor({ img, targChnl: channel, color })
+      const extract = extractSingleColor({ img: params.img, targChnl: channel, color })
       p5.image(extract, 0, 0)
     } else if (colorKeys.indexOf(p5.key) > -1) {
       params.currChannel = p5.key
-      oneChannel(img, p5.key)
+      oneChannel(params.img, p5.key)
     } else if (p5.key === 'o') {
       params.currChannel = 'original'
-      oneChannel(img, p5.key)
+      oneChannel(params.img, p5.key)
     } else if (p5.key === 'd') {
       const d = ditherImage(p5.get())
       p5.image(d, 0, 0)

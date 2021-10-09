@@ -1,24 +1,24 @@
 // from https://embed.plnkr.co/plunk/ERaf37
 
 
-function color_meter (_cwith2, _ccolor2) {
-    const _r = _cwith2[0]
-    const _g = _cwith2[1]
-    const _b = _cwith2[2]
+function color_meter (target, testColor) {
+    const targ_r = target[0]
+    const targ_g = target[1]
+    const targ_b = target[2]
   
-    const __r = _ccolor2[0]
-    const __g = _ccolor2[1]
-    const __b = _ccolor2[2]
+    const test_r = testColor[0]
+    const test_g = testColor[1]
+    const test_b = testColor[2]
   
-    let p1 = (_r / 255) * 100
-    let p2 = (_g / 255) * 100
-    let p3 = (_b / 255) * 100
+    let p1 = (targ_r / 255) * 100
+    let p2 = (targ_g / 255) * 100
+    let p3 = (targ_b / 255) * 100
   
     const perc1 = Math.round((p1 + p2 + p3) / 3)
   
-    p1 = (__r / 255) * 100
-    p2 = (__g / 255) * 100
-    p3 = (__b / 255) * 100
+    p1 = (test_r / 255) * 100
+    p2 = (test_g / 255) * 100
+    p3 = (test_b / 255) * 100
   
     const perc2 = Math.round((p1 + p2 + p3) / 3)
   

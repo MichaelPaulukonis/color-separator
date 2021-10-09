@@ -59,9 +59,7 @@ export default {
   */
   modules: [
     // Doc: https://axios.nuxtjs.org/usage
-    '@nuxtjs/axios',
-    '@nuxtjs/style-resources',
-    'nuxt-webfontloader'
+    '@nuxtjs/style-resources'
   ],
 
   styleResources: {

@@ -42,7 +42,7 @@ export default {
     }
   },
   mounted () {
-    const keypress = require('keypress.js')
+    // const keypress = require('keypress.js')
 
     const builder = (p5Instance) => {
       const colorSep = new Sketch({ p5Instance, p5Object: P5 }) // eslint-disable-line no-new

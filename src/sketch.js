@@ -33,8 +33,10 @@ export default function Sketch ({ p5Instance: p5, p5Object }) {
 
   p5.keyTyped = () => {
     if (p5.key === 'a') {
+      const channel = p5.random(['r', 'g', 'b'])
+      console.log(`channel: ${channel}`)
       const color = p5.random(Object.values(colors))
-      const extract = extractSingleColor({ img, targChnl: 'b', color })
+      const extract = extractSingleColor({ img, targChnl: channel, color })
       p5.image(extract, 0, 0)
     } else if (colorKeys.indexOf(p5.key) > -1) {
       params.currChannel = p5.key
@@ -114,15 +116,40 @@ export default function Sketch ({ p5Instance: p5, p5Object }) {
     return [c * 255, m * 255, y * 255, k * 255]
   }
 
+  // plan - pick a color, and keeps stuff "near" it
+  // returns percentage comparison (0..100)
+  function colorMeter (target, testColor) {
+    const targR = target[0]
+    const targG = target[1]
+    const targB = target[2]
+
+    const testR = testColor[0]
+    const testG = testColor[1]
+    const testB = testColor[2]
+
+    let p1 = (targR / 255) * 100
+    let p2 = (targG / 255) * 100
+    let p3 = (targB / 255) * 100
+
+    const perc1 = Math.round((p1 + p2 + p3) / 3)
+
+    p1 = (testR / 255) * 100
+    p2 = (testG / 255) * 100
+    p3 = (testB / 255) * 100
+
+    const perc2 = Math.round((p1 + p2 + p3) / 3)
+
+    const result = Math.abs(perc1 - perc2)
+    return result
+  }
+
   const extractSingleColor = ({ img, targChnl, color }) => {
-    // const isWhite = ([r, g, b]) => r === 0 && g === 0 && b === 0
-    // Get the brightness value of the pixel
-    // const gray = brightness(pixel);
-    const min = 50
-    const threshold = ([r, g, b]) => {
-      const c = p5.color(r, g, b)
-      const gray = p5.brightness(c)
-      return gray < min
+    const offset = ['b', 'r', 'g'].indexOf(targChnl)
+
+    const min = 100
+    const threshold = (color) => {
+      const targPixel = color[offset]
+      return targPixel < min
     }
     const channel = p5.createImage(img.width, img.height)
     img.loadPixels()
@@ -168,35 +195,19 @@ export default function Sketch ({ p5Instance: p5, p5Object }) {
         break
     }
 
-    // splits = colors.GREEN
-
     const channel = p5.createImage(img.width, img.height)
     img.loadPixels()
     channel.loadPixels()
-    // cyan: 0, 255, 255
-    // magenta: 255, 0, 255
-    // yellow: 255, 255, 0
+
     for (let i = 0; i < img.pixels.length; i += 4) {
-      // channel.pixels[i] = img.pixels[i + c]
-      // channel.pixels[i + 1] = img.pixels[i + c]
-      // channel.pixels[i + 2] = img.pixels[i + c]
-
-      // hrm. Extract color, then convert it to another color
-      // MATH!
-
-      // 0 channel needs to be normal
+      // cyan
       channel.pixels[i] = splits[0] === 0 ? img.pixels[i + channelOffset] : splits[0]
+      // magenta
       channel.pixels[i + 1] = splits[1] === 0 ? img.pixels[i + channelOffset] : splits[1]
+      // yellow
       channel.pixels[i + 2] = splits[2] === 0 ? img.pixels[i + channelOffset] : splits[2]
 
-      // channel.pixels[i] = splits[0]
-      // channel.pixels[i + 1] = splits[1]
-      // channel.pixels[i + 2] = splits[2]
-
-      // meh, who cares about alpha
       channel.pixels[i + 3] = img.pixels[i + 3]
-      // channel.pixels[i + 3] =
-      //   255 - (img.pixels[i + channelOffset] + img.pixels[i + channelOffset] + img.pixels[i + channelOffset]) / 3
     }
     channel.updatePixels()
     return channel

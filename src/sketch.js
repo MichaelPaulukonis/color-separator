@@ -1,6 +1,6 @@
 import saveAs from 'file-saver'
 import { datestring, filenamer } from './filelib'
-import colors from './colors'
+import { named, neonic } from './colors'
 
 let namer = null
 
@@ -53,7 +53,8 @@ export default function Sketch ({ p5Instance: p5, p5Object }) {
     if (p5.key === 'a') {
       const channel = p5.random(['r', 'g', 'b'])
       console.log(`channel: ${channel}`)
-      const color = p5.random(Object.values(colors))
+      // const color = p5.random(Object.values(named))
+      const color = p5.random(neonic)
       const extract = extractSingleColor({ img: params.img, targChnl: channel, color })
       p5.image(extract, 0, 0)
     } else if (colorKeys.indexOf(p5.key) > -1) {
@@ -164,7 +165,7 @@ export default function Sketch ({ p5Instance: p5, p5Object }) {
   const extractSingleColor = ({ img, targChnl, color }) => {
     const offset = ['b', 'r', 'g'].indexOf(targChnl)
 
-    const min = 100
+    const min = 150
     const threshold = (color) => {
       const targPixel = color[offset]
       return targPixel < min

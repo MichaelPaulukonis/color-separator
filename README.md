@@ -21,6 +21,17 @@ and it's [example sketch](https://github.com/antiboredom/p5.riso/blob/master/tut
 
 - I ran the bubblegum image through an online CMYK extractor and got a clean (but TINY) image, so there seem to be some flaws in the algorithm
 
+- fluorescents from https://www.w3schools.com/colors/colors_crayola.asp
+- may look at https://www.shutterstock.com/blog/neon-color-palettes
+- https://codepen.io/FelixRilling/pen/qzfoc
+- https://www.fashiontrendsetter.com/content/color_trends/color-decoder/Color-Code-Neon.html
+- https://css-tricks.com/nerds-guide-color-web
+- https://app.contrast-finder.org/?lang=en
+- https://stackoverflow.com/a/21315790
+- https://css-tricks.com/methods-contrasting-text-backgrounds/
+- https://en.wikipedia.org/wiki/Web_colors
+- https://www.rapidtables.com/web/css/css-color.html#yellow
+
 ### monochrome 
 
 - https://codepen.io/mikeurbonas/pen/poJKKvB

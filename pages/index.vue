@@ -8,6 +8,8 @@
   modal(name="help" height="auto" :draggable="true")
     Help
 
+  DataGui
+
   button#focus(@click="setFocus") focus on canvas
   button(@click="help") help
   button(@click="about") About
@@ -25,11 +27,13 @@ import P5 from 'p5'
 import VModal from 'vue-js-modal'
 import Help from '@/components/help'
 import About from '@/components/about'
+import DataGui from '@/components/DataGui.vue'
 
 import Sketch from '@/src/sketch.js'
 
 export default {
   components: {
+    DataGui,
     VModal,
     Help,
     About

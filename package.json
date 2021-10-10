@@ -19,7 +19,8 @@
     "publish": "npm run bump && DEPLOY_ENV=GH_PAGES npm run generate && npm run deploy",
     "lint:fix": "standard --fix",
     "lint": "standard",
-    "open": "open https://michaelpaulukonis.github.io/polychrome.p5/"
+    "open": "open https://michaelpaulukonis.github.io/polychrome.p5/",
+    "reset": "rm -rf node_modules package-lock.json && npm i"
   },
   "lint-staged": {
     "*.{js,vue}": "standard"

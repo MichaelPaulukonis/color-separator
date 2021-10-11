@@ -8,7 +8,10 @@
   modal(name="help" height="auto" :draggable="true")
     Help
 
-  DataGui
+  DataGui(
+    :threshold="params.threshold"
+    @updateThreshold="params.threshold = $event"
+  )
 
   button#focus(@click="setFocus") focus on canvas
   button(@click="help") help
@@ -42,14 +45,23 @@ export default {
     return {
       currentText: 'placeholder',
       colorSep: {},
-      textManager: {}
+      textManager: {},
+      params: {
+        threshold: 80
+      }
     }
   },
   mounted () {
-    // const keypress = require('keypress.js')
+    this.params = { ...this.params,
+      width: 500,
+      height: 500,
+      currChannel: '',
+      img: null,
+      imageLoaded: false
+    }
 
     const builder = (p5Instance) => {
-      const colorSep = new Sketch({ p5Instance, p5Object: P5 }) // eslint-disable-line no-new
+      const colorSep = new Sketch({ p5Instance, p5Object: P5, params: this.params }) // eslint-disable-line no-new
       this.colorSep = colorSep
     }
 

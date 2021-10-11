@@ -4,16 +4,17 @@ import { named, neonic } from './colors'
 
 let namer = null
 
-export default function Sketch ({ p5Instance: p5, p5Object }) {
+export default function Sketch ({ p5Instance: p5, p5Object, params }) {
   const colorSep = {}
   const density = 2
-  const params = {
-    width: 500,
-    height: 500,
-    currChannel: '',
-    img: null,
-    imageLoaded: false
-  }
+  // const params = {
+  //   width: 500,
+  //   height: 500,
+  //   currChannel: '',
+  //   img: null,
+  //   imageLoaded: false,
+  //   threshold: 150
+  // }
 
   p5.preload = () => {
     params.img = p5.loadImage(require('~/assets/images/sour_sweets05.jpg'))
@@ -165,16 +166,15 @@ export default function Sketch ({ p5Instance: p5, p5Object }) {
   const extractSingleColor = ({ img, targChnl, color }) => {
     const offset = ['b', 'r', 'g'].indexOf(targChnl)
 
-    const min = 150
-    const threshold = (color) => {
+    const dropToWhite = (color) => {
       const targPixel = color[offset]
-      return targPixel < min
+      return targPixel < params.threshold
     }
     const channel = p5.createImage(img.width, img.height)
     img.loadPixels()
     channel.loadPixels()
     for (let i = 0; i < img.pixels.length; i += 4) {
-      if (!threshold([img.pixels[i], img.pixels[i + 1], img.pixels[i + 2]])) {
+      if (!dropToWhite([img.pixels[i], img.pixels[i + 1], img.pixels[i + 2]])) {
         channel.pixels[i] = 255
         channel.pixels[i + 1] = 255
         channel.pixels[i + 2] = 255

@@ -52,10 +52,12 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
 
   p5.keyTyped = () => {
     if (p5.key === 'a') {
-      const channel = p5.random(['r', 'g', 'b'])
+      const channel = params.channel[0] // first letter (ugh)
+      // const channel = p5.random(['r', 'g', 'b'])
       console.log(`channel: ${channel}`)
       // const color = p5.random(Object.values(named))
-      const color = p5.random(neonic)
+      // const color = p5.random(neonic)
+      const color = params.color
       const extract = extractSingleColor({ img: params.img, targChnl: channel, color })
       p5.image(extract, 0, 0)
     } else if (colorKeys.indexOf(p5.key) > -1) {

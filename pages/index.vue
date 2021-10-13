@@ -11,6 +11,8 @@
   DataGui(
     :threshold="params.threshold"
     @updateThreshold="params.threshold = $event"
+    @updateColor="params.color = $event"
+    @updateChannel="params.channel = $event"
   )
 
   button#focus(@click="setFocus") focus on canvas
@@ -47,7 +49,9 @@ export default {
       colorSep: {},
       textManager: {},
       params: {
-        threshold: 80
+        threshold: 80,
+        color: [255, 72, 176],
+        channel: 'blue'
       }
     }
   },

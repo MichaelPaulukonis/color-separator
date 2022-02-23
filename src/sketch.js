@@ -4,20 +4,13 @@ import { named, neonic } from './colors'
 
 let namer = null
 
-export default function Sketch ({ p5Instance: p5, p5Object, params }) {
+export default function Sketch ({ p5Instance: p5, params }) {
   const colorSep = {}
   const density = 2
-  // const params = {
-  //   width: 500,
-  //   height: 500,
-  //   currChannel: '',
-  //   img: null,
-  //   imageLoaded: false,
-  //   threshold: 150
-  // }
 
   p5.preload = () => {
     params.img = p5.loadImage(require('~/assets/images/sour_sweets05.jpg'))
+    // params.img = p5.loadImage(require('~/assets/images/small.cmyk.png'))
   }
 
   p5.setup = () => {
@@ -48,17 +41,26 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
     }
   }
 
+  p5.mousePressed = () => {
+    // TODO: get color under mouse
+    // sent to params.eyedropper
+    const rgb = () => p5.int(p5.random(255))
+    // const color = [p5.int(p5.random(255)), p5.random(255), p5.random(255)]
+    params.eyedropper = `rgb(${rgb()},${rgb()},${rgb()})`
+  }
+
   const colorKeys = ['r', 'g', 'b', 'c', 'y', 'm', 'k']
 
   p5.keyTyped = () => {
     if (p5.key === 'a') {
       const channel = params.channel[0] // first letter (ugh)
-      // const channel = p5.random(['r', 'g', 'b'])
       console.log(`channel: ${channel}`)
-      // const color = p5.random(Object.values(named))
-      // const color = p5.random(neonic)
       const color = params.color
       const extract = extractSingleColor({ img: params.img, targChnl: channel, color })
+      p5.image(extract, 0, 0)
+    } else if (p5.key === 'e') {
+      const color = params.color
+      const extract = extractTargetColor({ img: params.img, color, extractColor: params.extractColor })
       p5.image(extract, 0, 0)
     } else if (colorKeys.indexOf(p5.key) > -1) {
       params.currChannel = p5.key
@@ -84,6 +86,9 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
     } else {
       extract = img
     }
+    p5.background(255, 255, 255)
+    // p5.clear()
+    p5.blendMode(p5.SUBTRACT)
     p5.image(extract, 0, 0)
   }
 
@@ -165,6 +170,38 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
     return result
   }
 
+  // use colorMeter to see if we keep it
+  const extractTargetColor = ({ img, color, extractColor }) => {
+    const extractRGB = [
+      p5.red(p5.color(extractColor)),
+      p5.green(p5.color(extractColor)),
+      p5.blue(p5.color(extractColor))
+    ]
+
+    const channel = p5.createImage(img.width, img.height)
+    img.loadPixels()
+    channel.loadPixels()
+    for (let i = 0; i < img.pixels.length; i += 4) {
+      const pixRGB = [img.pixels[i], img.pixels[i + 1], img.pixels[i + 2]]
+      const howClose = colorMeter(extractRGB, pixRGB)
+      if (howClose >= 3) {
+        // mayb e if average of a larger region? ugh.
+        channel.pixels[i] = 255
+        channel.pixels[i + 1] = 255
+        channel.pixels[i + 2] = 255
+      } else {
+        // leave 'em be!
+        channel.pixels[i] = img.pixels[i]
+        channel.pixels[i + 1] = img.pixels[i + 1]
+        channel.pixels[i + 2] = img.pixels[i + 2]
+      }
+      channel.pixels[i + 3] = img.pixels[i + 3]
+    }
+    channel.updatePixels()
+    return channel
+  }
+
+  // original
   const extractSingleColor = ({ img, targChnl, color }) => {
     const offset = ['b', 'r', 'g'].indexOf(targChnl)
 
@@ -244,14 +281,52 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
     img.loadPixels()
     channel.loadPixels()
     for (let i = 0; i < img.pixels.length; i += 4) {
-      const r = img.pixels[i]
-      const g = img.pixels[i + 1]
-      const b = img.pixels[i + 2]
-      const val = rgb2cmyk(r, g, b)[c]
-      channel.pixels[i] = val
-      channel.pixels[i + 1] = val
-      channel.pixels[i + 2] = val
-      channel.pixels[i + 3] = img.pixels[i + 3]
+
+      let tmp = p5.color(img.pixels[i], img.pixels[i + 1], img.pixels[i + 2], img.pixels[i + 3])
+      let _c = (255 - p5.red(tmp))
+      let _m = (255 - p5.green(tmp))
+      let _y = (255 - p5.blue(tmp))
+      let _k = (255 - p5.brightness(tmp))
+
+      // if nothing, it goes to clear
+      // it should go to black or white, depending
+
+      switch (c) {
+        case 0: // cyan
+          channel.pixels[i] = 0
+          channel.pixels[i + 1] = 255
+          channel.pixels[i + 2] = 255
+          channel.pixels[i + 3] = _c
+          break
+
+        case 1:
+          channel.pixels[i] = 255
+          channel.pixels[i + 1] = 0
+          channel.pixels[i + 2] = 255
+          channel.pixels[i + 3] = _m
+          break
+
+        case 2:
+          channel.pixels[i] = 255
+          channel.pixels[i + 1] = 255
+          channel.pixels[i + 2] = 0
+          channel.pixels[i + 3] = _y
+          break
+
+        case 3:
+          if (_k === 0) {
+            channel.pixels[i] = 0
+            channel.pixels[i + 1] = 0
+            channel.pixels[i + 2] = 0
+            channel.pixels[i + 3] = 0
+          } else {
+            channel.pixels[i] = 255
+            channel.pixels[i + 1] = 255
+            channel.pixels[i + 2] = 255
+            channel.pixels[i + 3] = 255
+          }
+          break
+      }
     }
     channel.updatePixels()
     return channel

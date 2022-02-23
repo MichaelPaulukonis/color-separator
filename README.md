@@ -32,6 +32,8 @@ and it's [example sketch](https://github.com/antiboredom/p5.riso/blob/master/tut
 - https://en.wikipedia.org/wiki/Web_colors
 - https://www.rapidtables.com/web/css/css-color.html#yellow
 
+- [CMYK and filters](https://discourse.processing.org/t/best-way-to-do-this-tint-c-m-y-k/5317/11)
+
 ### monochrome 
 
 - https://codepen.io/mikeurbonas/pen/poJKKvB
@@ -42,3 +44,4 @@ and it's [example sketch](https://github.com/antiboredom/p5.riso/blob/master/tut
 ## anything that is different
 
 - https://github.com/cyrilf/microbios/blob/e64e6381976842f474a922df29793d84a3d60c99/src/components/Controls.vue
+- http://kilobtye.github.io/potrace/# - black-n-white SVG

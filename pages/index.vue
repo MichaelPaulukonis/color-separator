@@ -10,9 +10,11 @@
 
   DataGui(
     :threshold="params.threshold"
+    :eyedropperIn="params.eyedropper"
     @updateThreshold="params.threshold = $event"
     @updateColor="params.color = $event"
     @updateChannel="params.channel = $event"
+    @updateExtractColor="params.extractColor = $event"
   )
 
   button#focus(@click="setFocus") focus on canvas
@@ -51,7 +53,9 @@ export default {
       params: {
         threshold: 80,
         color: [255, 72, 176],
-        channel: 'blue'
+        channel: 'blue',
+        extractColor: 'rgba(3, 23, 6, 1)',
+        eyedropper : 'rgb(255,255,255)'
       }
     }
   },

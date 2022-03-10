@@ -132,7 +132,6 @@ window.slowDown = () => {
         }
       }
 
-      // this.filter(GRAY);
       const buffer = createGraphics(this.width, this.height)
 
       buffer.loadPixels()

@@ -45,3 +45,27 @@ and it's [example sketch](https://github.com/antiboredom/p5.riso/blob/master/tut
 
 - https://github.com/cyrilf/microbios/blob/e64e6381976842f474a922df29793d84a3d60c99/src/components/Controls.vue
 - http://kilobtye.github.io/potrace/# - black-n-white SVG
+- LUTs <https://nick-shaw.github.io/cinematiccolor/luts-and-transforms.html>
+- <https://threejs.org/docs/#examples/en/math/Lut>
+- <https://www.emanueleferonato.com/2018/06/09/playing-with-javascript-photos-and-3d-luts-lookup-tables/> - from p5.riso.js
+
+## web workers
+
+- <https://medium.com/js-dojo/using-web-workers-vue-applications-3de99f4f3371>
+- <https://ourcodeworld.com/articles/read/1549/how-to-use-web-workers-in-vuejs>
+
+
+## doing things with ImageMagick
+
+Well, won't work for a web-app
+
+```
+convert CMYK-Chart.png -colorspace cmyk -channel c -negate -separate channel_c.png
+convert CMYK-Chart.png -colorspace cmyk -channel m -negate -separate channel_m.png
+convert CMYK-Chart.png -colorspace cmyk -channel y -negate -separate channel_y.png
+convert CMYK-Chart.png -colorspace cmyk -channel k -negate -separate channel_k.png
+
+convert channel_c.png +level-colors cyan,white channel_c_colored.png
+convert channel_m.png +level-colors magenta,white channel_m_colored.png
+convert channel_y.png +level-colors yellow,white channel_y_colored.png
+```

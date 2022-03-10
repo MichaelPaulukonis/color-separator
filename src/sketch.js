@@ -9,8 +9,11 @@ export default function Sketch ({ p5Instance: p5, params }) {
   const density = 2
 
   p5.preload = () => {
-    params.img = p5.loadImage(require('~/assets/images/sour_sweets05.jpg'))
+    // params.img = p5.loadImage(require('~/assets/images/sour_sweets05.jpg'))
     // params.img = p5.loadImage(require('~/assets/images/small.cmyk.png'))
+    // params.img = p5.loadImage(require('~/assets/images/Rain_blo_1_cent_d.jpg'))
+    params.img = p5.loadImage(require('~/assets/images/joe.cool.jpeg'))
+    // params.img = p5.loadImage(require('~/assets/images/black.square.jpeg'))
   }
 
   p5.setup = () => {
@@ -88,7 +91,7 @@ export default function Sketch ({ p5Instance: p5, params }) {
     }
     p5.background(255, 255, 255)
     // p5.clear()
-    p5.blendMode(p5.SUBTRACT)
+    // p5.blendMode(p5.SUBTRACT)
     p5.image(extract, 0, 0)
   }
 
@@ -228,6 +231,7 @@ export default function Sketch ({ p5Instance: p5, params }) {
     return channel
   }
 
+  // this IS CMYK, only faster than the other routine
   const extractRGBChannel = (img, targChnl) => {
     let channelOffset = 0
 
@@ -281,18 +285,14 @@ export default function Sketch ({ p5Instance: p5, params }) {
     img.loadPixels()
     channel.loadPixels()
     for (let i = 0; i < img.pixels.length; i += 4) {
-
-      let tmp = p5.color(img.pixels[i], img.pixels[i + 1], img.pixels[i + 2], img.pixels[i + 3])
-      let _c = (255 - p5.red(tmp))
-      let _m = (255 - p5.green(tmp))
-      let _y = (255 - p5.blue(tmp))
-      let _k = (255 - p5.brightness(tmp))
+      const tmp = p5.color(img.pixels[i], img.pixels[i + 1], img.pixels[i + 2], img.pixels[i + 3])
 
       // if nothing, it goes to clear
       // it should go to black or white, depending
 
       switch (c) {
         case 0: // cyan
+          const _c = (255 - p5.red(tmp))
           channel.pixels[i] = 0
           channel.pixels[i + 1] = 255
           channel.pixels[i + 2] = 255
@@ -300,6 +300,7 @@ export default function Sketch ({ p5Instance: p5, params }) {
           break
 
         case 1:
+          const _m = (255 - p5.green(tmp))
           channel.pixels[i] = 255
           channel.pixels[i + 1] = 0
           channel.pixels[i + 2] = 255
@@ -307,6 +308,7 @@ export default function Sketch ({ p5Instance: p5, params }) {
           break
 
         case 2:
+          const _y = (255 - p5.blue(tmp))
           channel.pixels[i] = 255
           channel.pixels[i + 1] = 255
           channel.pixels[i + 2] = 0
@@ -314,11 +316,13 @@ export default function Sketch ({ p5Instance: p5, params }) {
           break
 
         case 3:
-          if (_k === 0) {
+          const _k = (255 - Math.floor(p5.brightness(tmp)))
+          // console.log(`img[3]: ${img.pixels[i + 3]} brightness: ${p5.brightness(tmp)} _k: ${_k}`)
+          if (_k > 230) {
             channel.pixels[i] = 0
             channel.pixels[i + 1] = 0
             channel.pixels[i + 2] = 0
-            channel.pixels[i + 3] = 0
+            channel.pixels[i + 3] = 255
           } else {
             channel.pixels[i] = 255
             channel.pixels[i + 1] = 255

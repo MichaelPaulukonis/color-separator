@@ -12,6 +12,7 @@
     :threshold="params.threshold"
     :eyedropperIn="params.eyedropper"
     @updateThreshold="params.threshold = $event"
+    @updateDither="params.ditherType = $event"
     @updateColor="params.color = $event"
     @updateChannel="params.channel = $event"
     @updateExtractColor="params.extractColor = $event"
@@ -51,6 +52,7 @@ export default {
       colorSep: {},
       textManager: {},
       params: {
+        ditherType: 'none',
         threshold: 80,
         color: [255, 72, 176],
         channel: 'blue',

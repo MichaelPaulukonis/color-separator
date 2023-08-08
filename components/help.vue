@@ -9,6 +9,30 @@ div#helpbox
 
 <script>
 const keymap = [
+{
+    keys: ['s'],
+    note: 'Save canvas.'
+  },
+  {
+    keys: ['o'],
+    note: 'Original image.'
+  },
+  {
+    keys: ['D'],
+    note: 'Dither original image using ditherType and threshold (for "none" and "Bayer")'
+  },
+  {
+    keys: ['a'],
+    note: 'single color.'
+  },
+  {
+    keys: ['e'],
+    note: 'target color.'
+  },
+  {
+    keys: ['d'],
+    note: 'dither image.'
+  },
   {
     keys: ['r'],
     note: 'Extract red channel to magenta'
@@ -22,13 +46,9 @@ const keymap = [
     note: 'Extract blue channel to cyan'
   },
   {
-    keys: ['s'],
-    note: 'Save canvas.'
+    keys: ['cymk'.split('')],
+    note: 'Extract blue channel to cyan'
   },
-  {
-    keys: ['o'],
-    note: 'Original image.'
-  }
 ]
 
 export default {

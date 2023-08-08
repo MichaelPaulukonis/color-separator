@@ -72,7 +72,7 @@ export default function Sketch ({ p5Instance: p5, params }) {
       params.currChannel = 'original'
       oneChannel(params.img, p5.key)
     } else if (p5.key === 'd') {
-      const d = ditherImage(p5.get())
+      const d = ditherImage(params.img, params.ditherType, params.threshold)
       p5.image(d, 0, 0)
     } else if (p5.key === 's') {
       savit()
@@ -336,7 +336,7 @@ export default function Sketch ({ p5Instance: p5, params }) {
     return channel
   }
 
-  const ditherImage = (img, type, threshold = 128) => {
+  const ditherImage = (img, type = 'floydsteinberg', threshold = 128) => {
     // source adapted from: https://github.com/meemoo/meemooapp/blob/44236a29574812026407c0288ab15390e88b556a/src/nodes/image-monochrome-worker.js
 
     const out = img.get()

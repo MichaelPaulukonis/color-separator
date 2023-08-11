@@ -1,7 +1,8 @@
+import webpack from 'webpack'
 // only add `router.base = '/<repository-name>/'` if `DEPLOY_ENV` is `GH_PAGES`
 const routerBase = {
   router: {
-    base: process.env.DEPLOY_ENV === 'GH_PAGES' ? '/polychrome.p5/' : ''
+    base: process.env.DEPLOY_ENV === 'GH_PAGES' ? '/color-separator/' : ''
   }
 }
 
@@ -20,14 +21,9 @@ export default {
     ],
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+    ],
+    script: [
     ]
-    // script: [
-    //   {
-    //     src: 'p5.riso.js',
-    //     body: true,
-    //     bodyAppend: true
-    //   }
-    // ]
   },
   /*
   ** Customize the progress-bar color
@@ -59,7 +55,6 @@ export default {
   ** Nuxt.js modules
   */
   modules: [
-    // Doc: https://axios.nuxtjs.org/usage
     '@nuxtjs/style-resources'
   ],
 

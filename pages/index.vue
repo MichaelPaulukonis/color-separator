@@ -31,7 +31,8 @@
 </template>
 
 <script>
-import P5 from 'p5'
+import P5 from 'p5/lib/p5'
+window.p5 = P5
 import VModal from 'vue-js-modal'
 import Help from '@/components/help'
 import About from '@/components/about'
@@ -46,7 +47,7 @@ export default {
     Help,
     About
   },
-  data () {
+  data() {
     return {
       currentText: 'placeholder',
       colorSep: {},
@@ -57,12 +58,26 @@ export default {
         color: [255, 72, 176],
         channel: 'blue',
         extractColor: 'rgba(3, 23, 6, 1)',
-        eyedropper : 'rgb(255,255,255)'
+        eyedropper: 'rgb(255,255,255)'
       }
     }
   },
-  mounted () {
-    this.params = { ...this.params,
+  // head() {
+  //   return {
+  //     script: [
+  //       {
+  //         hid: 'riso',
+  //         src: '/p5.riso.js',
+  //         defer: true,
+  //         // Changed after script load
+  //         callback: () => { this.isRisoLoaded = true }
+  //       }
+  //     ]
+  //   }
+  // },
+  mounted() {
+    this.params = {
+      ...this.params,
       width: 500,
       height: 500,
       currChannel: '',
@@ -71,6 +86,7 @@ export default {
     }
 
     const builder = (p5Instance) => {
+      window._p5Instance = p5Instance
       const colorSep = new Sketch({ p5Instance, p5Object: P5, params: this.params }) // eslint-disable-line no-new
       this.colorSep = colorSep
     }
@@ -79,16 +95,16 @@ export default {
 
   },
   methods: {
-    setFocus () {
+    setFocus() {
       this.canvas().focus()
     },
-    canvas () {
+    canvas() {
       return document.getElementsByTagName('canvas')[0]
     },
-    about () {
+    about() {
       this.$modal.show('about')
     },
-    help () {
+    help() {
       this.$modal.show('help')
     }
   }
@@ -96,7 +112,6 @@ export default {
 </script>
 
 <style scoped>
-/* @import "@/assets/css/core.css"; */
 #title {
   background: linear-gradient(90deg, #f0f, #ff0);
   line-height: 1.5em;

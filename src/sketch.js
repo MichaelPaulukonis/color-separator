@@ -1,23 +1,30 @@
 import saveAs from 'file-saver'
 import { datestring, filenamer } from './filelib'
-import { named, neonic } from './colors'
+// import { named, neonic } from './colors'
+// import P5 from 'p5'
+// require('@/static/p5.riso.js')
+
+console.log('here we go')
 
 let namer = null
 
-export default function Sketch ({ p5Instance: p5, params }) {
+export default function Sketch ({ p5Instance: p5, p5Object, params }) {
   const colorSep = {}
-  const density = 2
+  const density = 1 // halftone (and other riso funcs) don't work with 2 NO IDEA
 
   p5.preload = () => {
-    // params.img = p5.loadImage(require('~/assets/images/sour_sweets05.jpg'))
+    params.img = p5.loadImage(require('~/assets/images/sour_sweets05.jpg'))
     // params.img = p5.loadImage(require('~/assets/images/small.cmyk.png'))
     // params.img = p5.loadImage(require('~/assets/images/Rain_blo_1_cent_d.jpg'))
-    params.img = p5.loadImage(require('~/assets/images/joe.cool.jpeg'))
+    // params.img = p5.loadImage(require('~/assets/images/joe.cool.jpeg'))
     // params.img = p5.loadImage(require('~/assets/images/black.square.jpeg'))
   }
 
   p5.setup = () => {
-    p5.pixelDensity(density)
+    console.log('p5 setup')
+
+    window._p5Instance = p5
+    p5.pixelDensity(1)
     params.width = params.img.width
     params.height = params.img.height
     const canvas = p5.createCanvas(params.width, params.height)
@@ -76,7 +83,20 @@ export default function Sketch ({ p5Instance: p5, params }) {
       p5.image(d, 0, 0)
     } else if (p5.key === 's') {
       savit()
+    } else if (p5.key === 'h') {
+      halftoner(params.img)
     }
+  }
+
+  const halftoner = (img) => {
+    const pink = new Riso('fluorescentpink')
+    p5.background(220)
+    clearRiso()
+
+    const halftoned = halftoneImage(params.img, 'line', 3, 45, 90)
+
+    pink.image(halftoned, 0, 0)
+    drawRiso()
   }
 
   const oneChannel = (img, channel) => {
@@ -411,6 +431,321 @@ export default function Sketch ({ p5Instance: p5, params }) {
   }
 
   colorSep.savit = savit
+
+  const RISOCOLORS = [
+    { name: 'BLACK', color: [0, 0, 0] },
+    { name: 'BURGUNDY', color: [145, 78, 114] },
+    { name: 'BLUE', color: [0, 120, 191] },
+    { name: 'GREEN', color: [0, 169, 92] },
+    { name: 'MEDIUMBLUE', color: [50, 85, 164] },
+    { name: 'BRIGHTRED', color: [241, 80, 96] },
+    { name: 'RISOFEDERALBLUE', color: [61, 85, 136] },
+    { name: 'PURPLE', color: [118, 91, 167] },
+    { name: 'TEAL', color: [0, 131, 138] },
+    { name: 'FLATGOLD', color: [187, 139, 65] },
+    { name: 'HUNTERGREEN', color: [64, 112, 96] },
+    { name: 'RED', color: [255, 102, 94] },
+    { name: 'BROWN', color: [146, 95, 82] },
+    { name: 'YELLOW', color: [255, 232, 0] },
+    { name: 'MARINERED', color: [210, 81, 94] },
+    { name: 'ORANGE', color: [255, 108, 47] },
+    { name: 'FLUORESCENTPINK', color: [255, 72, 176] },
+    { name: 'LIGHTGRAY', color: [136, 137, 138] },
+    { name: 'METALLICGOLD', color: [172, 147, 110] },
+    { name: 'CRIMSON', color: [228, 93, 80] },
+    { name: 'FLUORESCENTORANGE', color: [255, 116, 119] },
+    { name: 'CORNFLOWER', color: [98, 168, 229] },
+    { name: 'SKYBLUE', color: [73, 130, 207] },
+    { name: 'SEABLUE', color: [0, 116, 162] },
+    { name: 'LAKE', color: [35, 91, 168] },
+    { name: 'INDIGO', color: [72, 77, 122] },
+    { name: 'MIDNIGHT', color: [67, 80, 96] },
+    { name: 'MIST', color: [213, 228, 192] },
+    { name: 'GRANITE', color: [165, 170, 168] },
+    { name: 'CHARCOAL', color: [112, 116, 124] },
+    { name: 'SMOKYTEAL', color: [95, 130, 137] },
+    { name: 'STEEL', color: [55, 94, 119] },
+    { name: 'SLATE', color: [94, 105, 94] },
+    { name: 'TURQUOISE', color: [0, 170, 147] },
+    { name: 'EMERALD', color: [25, 151, 93] },
+    { name: 'GRASS', color: [57, 126, 88] },
+    { name: 'FOREST', color: [81, 110, 90] },
+    { name: 'SPRUCE', color: [74, 99, 93] },
+    { name: 'MOSS', color: [104, 114, 77] },
+    { name: 'SEAFOAM', color: [98, 194, 177] },
+    { name: 'KELLYGREEN', color: [103, 179, 70] },
+    { name: 'LIGHTTEAL', color: [0, 157, 165] },
+    { name: 'IVY', color: [22, 155, 98] },
+    { name: 'PINE', color: [35, 126, 116] },
+    { name: 'LAGOON', color: [47, 97, 101] },
+    { name: 'VIOLET', color: [157, 122, 210] },
+    { name: 'ORCHID', color: [170, 96, 191] },
+    { name: 'PLUM', color: [132, 89, 145] },
+    { name: 'RAISIN', color: [119, 93, 122] },
+    { name: 'GRAPE', color: [108, 93, 128] },
+    { name: 'SCARLET', color: [246, 80, 88] },
+    { name: 'TOMATO', color: [210, 81, 94] },
+    { name: 'CRANBERRY', color: [209, 81, 122] },
+    { name: 'MAROON', color: [158, 76, 110] },
+    { name: 'RASPBERRYRED', color: [209, 81, 122] },
+    { name: 'BRICK', color: [167, 81, 84] },
+    { name: 'LIGHTLIME', color: [227, 237, 85] },
+    { name: 'SUNFLOWER', color: [255, 181, 17] },
+    { name: 'MELON', color: [255, 174, 59] },
+    { name: 'APRICOT', color: [246, 160, 77] },
+    { name: 'PAPRIKA', color: [238, 127, 75] },
+    { name: 'PUMPKIN', color: [255, 111, 76] },
+    { name: 'BRIGHTOLIVEGREEN', color: [180, 159, 41] },
+    { name: 'BRIGHTGOLD', color: [186, 128, 50] },
+    { name: 'COPPER', color: [189, 100, 57] },
+    { name: 'MAHOGANY', color: [142, 89, 90] },
+    { name: 'BISQUE', color: [242, 205, 207] },
+    { name: 'BUBBLEGUM', color: [249, 132, 202] },
+    { name: 'LIGHTMAUVE', color: [230, 181, 201] },
+    { name: 'DARKMAUVE', color: [189, 140, 166] },
+    { name: 'WINE', color: [145, 78, 114] },
+    { name: 'GRAY', color: [146, 141, 136] },
+    { name: 'CORAL', color: [255, 142, 145] },
+    { name: 'WHITE', color: [255, 255, 255] },
+    { name: 'AQUA', color: [94, 200, 229] },
+    { name: 'MINT', color: [130, 216, 213] },
+    { name: 'CLEARMEDIUM', color: [242, 242, 242] },
+    { name: 'FLUORESCENTYELLOW', color: [255, 233, 22] },
+    { name: 'FLUORESCENTRED', color: [255, 76, 101] },
+    { name: 'FLUORESCENTGREEN', color: [68, 214, 44] }
+  ]
+
+  class Riso extends p5Object.Graphics {
+    constructor (channelColor, w, h) {
+      if (!w) w = p5.width
+      if (!h) h = p5.height
+
+      super(w, h, null, p5)
+
+      let foundColor
+
+      if (typeof channelColor === 'string') {
+        channelColor = channelColor.trim().replace(/ /g, '').toUpperCase()
+        foundColor = RISOCOLORS.find(c => c.name === channelColor)
+      }
+
+      if (foundColor) {
+        this.channelColor = foundColor.color
+        this.channelName = foundColor.name
+      } else {
+        this.channelColor = channelColor
+        this.channelName = null
+      }
+
+      // store original versions of fill and stroke
+      this._fill = p5Object.prototype.fill.bind(this)
+      this._stroke = p5Object.prototype.stroke.bind(this)
+      this._image = p5Object.prototype.image.bind(this)
+
+      this.stroke(this.channelColor[0], this.channelColor[1], this.channelColor[2]) // stroke with channel color by default
+
+      this.channelIndex = Riso.channels.length
+
+      Riso.channels.push(this)
+    }
+
+    export (filename) {
+      if (!filename) {
+        if (this.channelName) {
+          filename = this.channelName + '.png'
+        } else {
+          filename = this.channelIndex + '.png'
+        }
+      }
+
+      // this.filter(GRAY);
+
+      const buffer = p5.createGraphics(this.width, this.height)
+
+      buffer.loadPixels()
+      this.loadPixels()
+
+      for (let i = 0; i < this.pixels.length; i += 4) {
+        buffer.pixels[i] = 0
+        buffer.pixels[i + 1] = 0
+        buffer.pixels[i + 2] = 0
+        buffer.pixels[i + 3] = this.pixels[i + 3]
+      }
+
+      buffer.updatePixels()
+      buffer.save(filename)
+    }
+
+    cutout (imageMask) {
+      const img = this.get()
+      img.cutout(imageMask)
+      this.clear()
+      this.copy(img, 0, 0, this.width, this.height, 0, 0, img.width, img.height)
+    }
+
+    stroke (c) {
+      this._stroke(this.channelColor[0], this.channelColor[1], this.channelColor[2], c)
+    }
+
+    fill (c) {
+      this._fill(this.channelColor[0], this.channelColor[1], this.channelColor[2], c)
+    }
+
+    image (img, x, y, w, h) {
+      const alphaValue = p5.alpha(this.drawingContext.fillStyle) / 255
+      const newImage = p5.createImage(img.width, img.height)
+      img.loadPixels()
+      newImage.loadPixels()
+      for (let i = 0; i < newImage.pixels.length; i += 4) {
+        newImage.pixels[i] = this.channelColor[0]
+        newImage.pixels[i + 1] = this.channelColor[1]
+        newImage.pixels[i + 2] = this.channelColor[2]
+
+        if (img.pixels[i + 3] < 255) {
+          newImage.pixels[i + 3] = img.pixels[i + 3] * alphaValue
+        } else {
+          newImage.pixels[i + 3] = (255 - (img.pixels[i] + img.pixels[i + 1] + img.pixels[i + 2]) / 3) * alphaValue
+        }
+      }
+      newImage.updatePixels()
+      this._image(newImage, x, y, w, h)
+      return newImage
+    }
+
+    draw () {
+      console.log(this)
+      p5.image(this, 0, 0)
+    }
+  }
+
+  function drawRiso () {
+    p5.blendMode(p5.MULTIPLY)
+    Riso.channels.forEach(c => c.draw())
+    p5.blendMode(p5.BLEND)
+  }
+
+  function exportRiso () {
+    Riso.channels.forEach(c => c.export())
+  }
+
+  function clearRiso () {
+    Riso.channels.forEach(c => c.clear())
+  }
+
+  function risoNoFill () {
+    Riso.channels.forEach(c => c.noFill())
+  }
+
+  function risoNoStroke () {
+    Riso.channels.forEach(c => c.noStroke())
+  }
+
+  function halftoneImage (img, shape, frequency, angle, intensity) {
+    if (shape === undefined) shape = 'circle'
+    if (frequency === undefined) frequency = 10
+    if (angle === undefined) angle = 45
+    if (intensity === undefined) intensity = 127
+
+    const halftonePatterns = {
+      line (c, x, y, g, d) {
+        c.rect(x, y, g, g * d)
+      },
+      square (c, x, y, g, d) {
+        c.rect(x, y, g * d, g * d)
+      },
+      circle (c, x, y, g, d) {
+        c.ellipse(x, y, d * g, d * g)
+      },
+      ellipse (c, x, y, g, d) {
+        c.ellipse(x, y, g * d * 0.7, g * d)
+      },
+      cross (c, x, y, g, d) {
+        c.rect(x, y, g, g * d)
+        c.rect(x, y, g * d, g)
+      }
+    }
+
+    const patternFunction = typeof shape === 'function' ? shape : halftonePatterns[shape]
+
+    const w = img.width
+    const h = img.height
+
+    const rotatedCanvas = p5.createGraphics(img.width * 2, img.height * 2)
+    rotatedCanvas.background(255)
+    rotatedCanvas.imageMode(p5.CENTER)
+    rotatedCanvas.push()
+    rotatedCanvas.translate(img.width, img.height)
+    rotatedCanvas.rotate(-angle)
+    rotatedCanvas.image(img, 0, 0)
+    rotatedCanvas.pop()
+    rotatedCanvas.loadPixels()
+
+    const out = p5.createGraphics(w * 2, h * 2)
+    out.background(255)
+    out.ellipseMode(p5.CORNER)
+    out.rectMode(p5.CENTER)
+    out.fill(0)
+    out.noStroke()
+
+    const gridsize = frequency
+
+    for (let x = 0; x < w * 2; x += gridsize) {
+      for (let y = 0; y < h * 2; y += gridsize) {
+        const avg = rotatedCanvas.pixels[(x + y * w * 2) * 4]
+
+        if (avg < 255) {
+          const darkness = (255 - avg) / 255
+          patternFunction(out, x, y, gridsize, darkness)
+        }
+      }
+    }
+    rotatedCanvas.background(255)
+    rotatedCanvas.push()
+    rotatedCanvas.translate(w, h)
+    rotatedCanvas.rotate(angle)
+    rotatedCanvas.image(out, 0, 0)
+    rotatedCanvas.pop()
+
+    const result = rotatedCanvas.get(w / 2, h / 2, w, h)
+    if (intensity === false) {
+      return result
+    } else {
+      return ditherImage(result, 'none', intensity)
+    }
+  }
+
+  p5Object.Image.prototype.cutout = function (p5Image) {
+    // this is basically the same as mask but without an different compositeoperation
+
+    if (p5Image === undefined) {
+      p5Image = this
+    }
+    const currBlend = this.drawingContext.globalCompositeOperation
+
+    let scaleFactor = 1
+    if (p5Image instanceof p5.Renderer) {
+      scaleFactor = p5Image._pInst._pixelDensity
+    }
+
+    const copyArgs = [
+      p5Image,
+      0,
+      0,
+      scaleFactor * p5Image.width,
+      scaleFactor * p5Image.height,
+      0,
+      0,
+      this.width,
+      this.height
+    ]
+
+    this.drawingContext.globalCompositeOperation = 'destination-out'
+    p5.Image.prototype.copy.apply(this, copyArgs)
+    this.drawingContext.globalCompositeOperation = currBlend
+    this.setModified(true)
+  }
+
+  Riso.channels = []
 
   return colorSep
 }

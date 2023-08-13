@@ -1,33 +1,30 @@
 import saveAs from 'file-saver'
 import { datestring, filenamer } from './filelib'
-// import { named, neonic } from './colors'
-// import P5 from 'p5'
-// require('@/static/p5.riso.js')
-
-console.log('here we go')
 
 let namer = null
 
-export default function Sketch ({ p5Instance: p5, p5Object, params }) {
+export default function Sketch({ p5Instance: p5, p5Object, params }) {
   const colorSep = {}
   const density = 1 // halftone (and other riso funcs) don't work with 2 NO IDEA
 
   p5.preload = () => {
-    params.img = p5.loadImage(require('~/assets/images/sour_sweets05.jpg'))
+    // params.img = p5.loadImage(require('~/assets/images/sour_sweets05.jpg'))
+    params.img = p5.loadImage(require('~/assets/images/nancy.bubblegum.jpg'))
+
     // params.img = p5.loadImage(require('~/assets/images/small.cmyk.png'))
     // params.img = p5.loadImage(require('~/assets/images/Rain_blo_1_cent_d.jpg'))
     // params.img = p5.loadImage(require('~/assets/images/joe.cool.jpeg'))
     // params.img = p5.loadImage(require('~/assets/images/black.square.jpeg'))
   }
 
-  p5.setup = () => {
-    console.log('p5 setup')
+  let canvas;
 
+  p5.setup = () => {
     window._p5Instance = p5
     p5.pixelDensity(1)
     params.width = params.img.width
     params.height = params.img.height
-    const canvas = p5.createCanvas(params.width, params.height)
+    canvas = p5.createCanvas(params.width, params.height)
     canvas.drop(gotFile)
     canvas.parent('#sketch-holder')
     p5.background('white')
@@ -55,7 +52,6 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
     // TODO: get color under mouse
     // sent to params.eyedropper
     const rgb = () => p5.int(p5.random(255))
-    // const color = [p5.int(p5.random(255)), p5.random(255), p5.random(255)]
     params.eyedropper = `rgb(${rgb()},${rgb()},${rgb()})`
   }
 
@@ -64,13 +60,12 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
   p5.keyTyped = () => {
     if (p5.key === 'a') {
       const channel = params.channel[0] // first letter (ugh)
-      console.log(`channel: ${channel}`)
       const color = params.color
       const extract = extractSingleColor({ img: params.img, targChnl: channel, color })
       p5.image(extract, 0, 0)
     } else if (p5.key === 'e') {
-      const color = params.color
-      const extract = extractTargetColor({ img: params.img, color, extractColor: params.extractColor })
+      // doesn't use params.color only extract/target
+      const extract = extractTargetColor({ img: params.img, color: params.color, extractColor: params.extractColor, threshold: params.threshold })
       p5.image(extract, 0, 0)
     } else if (colorKeys.indexOf(p5.key) > -1) {
       params.currChannel = p5.key
@@ -84,19 +79,23 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
     } else if (p5.key === 's') {
       savit()
     } else if (p5.key === 'h') {
-      halftoner(params.img)
+      const img = p5.get()
+      halftoner({ img, pattern: params.halftonePattern, threshold: params.threshold, angle: params.halftoneAngle, size: params.halftoneSize })
     }
   }
 
-  const halftoner = (img) => {
-    const pink = new Riso('fluorescentpink')
-    p5.background(220)
+  // somewhat picky about threshold
+  // when (re)processing a single-color image often goes to all-white
+  const halftoner = ({ img, pattern, threshold, angle, size }) => {
+    const rso = new Riso(params.color)
+    p5.background(255)
     clearRiso()
 
-    const halftoned = halftoneImage(params.img, 'line', 3, 45, 90)
+    const halftoned = halftoneImage(img, pattern, size, angle, threshold)
 
-    pink.image(halftoned, 0, 0)
+    rso.image(halftoned, 0, 0)
     drawRiso()
+    halftoned.remove()
   }
 
   const oneChannel = (img, channel) => {
@@ -168,7 +167,10 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
 
   // plan - pick a color, and keeps stuff "near" it
   // returns percentage comparison (0..100)
-  function colorMeter (target, testColor) {
+  // strong reds can be "closer" to strong green than light greens
+  // which is not what I want
+  /// hey! what about the color sorter code??? !!!
+  function colorMeter(target, testColor) {
     const targR = target[0]
     const targG = target[1]
     const targB = target[2]
@@ -194,7 +196,7 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
   }
 
   // use colorMeter to see if we keep it
-  const extractTargetColor = ({ img, color, extractColor }) => {
+  const extractTargetColor = ({ img, color, extractColor, threshold }) => {
     const extractRGB = [
       p5.red(p5.color(extractColor)),
       p5.green(p5.color(extractColor)),
@@ -206,8 +208,9 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
     channel.loadPixels()
     for (let i = 0; i < img.pixels.length; i += 4) {
       const pixRGB = [img.pixels[i], img.pixels[i + 1], img.pixels[i + 2]]
-      const howClose = colorMeter(extractRGB, pixRGB)
-      if (howClose >= 3) {
+      const howClose = colorMeter(extractRGB, pixRGB) // returns 0..100
+      const comp = p5.map(howClose, 0, 100, 0, 255)
+      if (comp >= threshold) {
         // mayb e if average of a larger region? ugh.
         channel.pixels[i] = 255
         channel.pixels[i + 1] = 255
@@ -516,7 +519,7 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
   ]
 
   class Riso extends p5Object.Graphics {
-    constructor (channelColor, w, h) {
+    constructor(channelColor, w, h) {
       if (!w) w = p5.width
       if (!h) h = p5.height
 
@@ -549,7 +552,7 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
       Riso.channels.push(this)
     }
 
-    export (filename) {
+    export(filename) {
       if (!filename) {
         if (this.channelName) {
           filename = this.channelName + '.png'
@@ -576,22 +579,22 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
       buffer.save(filename)
     }
 
-    cutout (imageMask) {
+    cutout(imageMask) {
       const img = this.get()
       img.cutout(imageMask)
       this.clear()
       this.copy(img, 0, 0, this.width, this.height, 0, 0, img.width, img.height)
     }
 
-    stroke (c) {
+    stroke(c) {
       this._stroke(this.channelColor[0], this.channelColor[1], this.channelColor[2], c)
     }
 
-    fill (c) {
+    fill(c) {
       this._fill(this.channelColor[0], this.channelColor[1], this.channelColor[2], c)
     }
 
-    image (img, x, y, w, h) {
+    image(img, x, y, w, h) {
       const alphaValue = p5.alpha(this.drawingContext.fillStyle) / 255
       const newImage = p5.createImage(img.width, img.height)
       img.loadPixels()
@@ -612,54 +615,54 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
       return newImage
     }
 
-    draw () {
-      console.log(this)
+    draw() {
       p5.image(this, 0, 0)
     }
   }
 
-  function drawRiso () {
+  function drawRiso() {
     p5.blendMode(p5.MULTIPLY)
     Riso.channels.forEach(c => c.draw())
     p5.blendMode(p5.BLEND)
   }
 
-  function exportRiso () {
+  function exportRiso() {
     Riso.channels.forEach(c => c.export())
   }
 
-  function clearRiso () {
+  function clearRiso() {
     Riso.channels.forEach(c => c.clear())
   }
 
-  function risoNoFill () {
+  function risoNoFill() {
     Riso.channels.forEach(c => c.noFill())
   }
 
-  function risoNoStroke () {
+  function risoNoStroke() {
     Riso.channels.forEach(c => c.noStroke())
   }
 
-  function halftoneImage (img, shape, frequency, angle, intensity) {
+  // frequency is gridSize !!!
+  function halftoneImage(img, shape, frequency, angle, intensity) {
     if (shape === undefined) shape = 'circle'
     if (frequency === undefined) frequency = 10
     if (angle === undefined) angle = 45
     if (intensity === undefined) intensity = 127
 
     const halftonePatterns = {
-      line (c, x, y, g, d) {
+      line(c, x, y, g, d) {
         c.rect(x, y, g, g * d)
       },
-      square (c, x, y, g, d) {
+      square(c, x, y, g, d) {
         c.rect(x, y, g * d, g * d)
       },
-      circle (c, x, y, g, d) {
+      circle(c, x, y, g, d) {
         c.ellipse(x, y, d * g, d * g)
       },
-      ellipse (c, x, y, g, d) {
+      ellipse(c, x, y, g, d) {
         c.ellipse(x, y, g * d * 0.7, g * d)
       },
-      cross (c, x, y, g, d) {
+      cross(c, x, y, g, d) {
         c.rect(x, y, g, g * d)
         c.rect(x, y, g * d, g)
       }
@@ -707,6 +710,9 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
     rotatedCanvas.pop()
 
     const result = rotatedCanvas.get(w / 2, h / 2, w, h)
+    rotatedCanvas.remove()
+    out.remove()
+
     if (intensity === false) {
       return result
     } else {

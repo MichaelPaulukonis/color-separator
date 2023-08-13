@@ -13,6 +13,9 @@
     :eyedropperIn="params.eyedropper"
     @updateThreshold="params.threshold = $event"
     @updateDither="params.ditherType = $event"
+    @updateHalftone="params.halftonePattern = $event"
+    @updateHalftoneSize="params.halftoneSize = $event"
+    @updateHalftoneAngle="params.halftoneAngle = $event"
     @updateColor="params.color = $event"
     @updateChannel="params.channel = $event"
     @updateExtractColor="params.extractColor = $event"
@@ -54,6 +57,9 @@ export default {
       textManager: {},
       params: {
         ditherType: 'none',
+        halftonePattern: 'circle',
+        halftoneSize: 5,
+        halftoneAngle: 45,
         threshold: 80,
         color: [255, 72, 176],
         channel: 'blue',
@@ -62,19 +68,6 @@ export default {
       }
     }
   },
-  // head() {
-  //   return {
-  //     script: [
-  //       {
-  //         hid: 'riso',
-  //         src: '/p5.riso.js',
-  //         defer: true,
-  //         // Changed after script load
-  //         callback: () => { this.isRisoLoaded = true }
-  //       }
-  //     ]
-  //   }
-  // },
   mounted() {
     this.params = {
       ...this.params,

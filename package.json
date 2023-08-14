@@ -1,7 +1,7 @@
 {
-  "name": "polychrome.p5",
+  "name": "color-separator",
   "version": "1.0.64",
-  "description": "A colorful text painter",
+  "description": "Color channel separations and other tools, using p5js",
   "main_orig": "index.html/sketch.js",
   "main": "src/index.js",
   "engines": {
@@ -19,7 +19,7 @@
     "publish": "npm run bump && DEPLOY_ENV=GH_PAGES npm run generate && npm run deploy",
     "lint:fix": "standard --fix",
     "lint": "standard",
-    "open": "open https://michaelpaulukonis.github.io/polychrome.p5/",
+    "open": "open https://michaelpaulukonis.github.io/color-separator/",
     "reset": "rm -rf node_modules package-lock.json && npm i"
   },
   "lint-staged": {
@@ -32,19 +32,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MichaelPaulukonis/polychrome.p5.git"
+    "url": "git+https://github.com/MichaelPaulukonis/color-separator.git"
   },
   "keywords": [
     "p5",
-    "text",
-    "paint"
+    "color"
   ],
   "author": "Michael J. Paulukonis",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/MichaelPaulukonis/polychrome.p5/issues"
+    "url": "https://github.com/MichaelPaulukonis/color-separator/issues"
   },
-  "homepage": "https://github.com/MichaelPaulukonis/polychrome.p5#readme",
+  "homepage": "https://github.com/MichaelPaulukonis/color-separator#readme",
   "dependencies": {
     "@cyrilf/vue-dat-gui": "^0.3.0",
     "@nuxtjs/style-resources": "^1.0.0",
@@ -75,6 +74,9 @@
   },
   "standard": {
     "plugins": [],
-    "parser": "babel-eslint"
+    "parser": "babel-eslint",
+    "ignore": [
+      "/study/"
+    ]
   }
 }

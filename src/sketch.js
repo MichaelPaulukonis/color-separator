@@ -3,14 +3,14 @@ import { datestring, filenamer } from './filelib'
 
 let namer = null
 
-export default function Sketch ({ p5Instance: p5, p5Object, params }) {
+export default function Sketch({ p5Instance: p5, p5Object, params }) {
   const colorSep = {}
   const density = 1 // halftone (and other riso funcs) don't work with 2 NO IDEA
 
   p5.preload = () => {
     // params.img = p5.loadImage(require('~/assets/images/sour_sweets05.jpg'))
-    params.img = p5.loadImage(require('~/assets/images/nancy.bubblegum.jpg'))
-
+    // params.img = p5.loadImage(require('~/assets/images/nancy.bubblegum.jpg'))
+    params.img = p5.loadImage(require('~/assets/images/CMYK-Chart.png'))
     // params.img = p5.loadImage(require('~/assets/images/small.cmyk.png'))
     // params.img = p5.loadImage(require('~/assets/images/Rain_blo_1_cent_d.jpg'))
     // params.img = p5.loadImage(require('~/assets/images/joe.cool.jpeg'))
@@ -104,7 +104,7 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
       extract = extractRGBChannel(img, channel)
       // extract = extractSingleColor({ img, targChnl: channel })
     } else if (['c', 'y', 'm', 'k'].indexOf(channel) > -1) {
-      extract = extractCMYKChannel(img, channel)
+      extract = extractCMYKChannelRiso(img, channel)
     } else {
       extract = img
     }
@@ -164,7 +164,7 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
   }
 
   // from https://stackoverflow.com/a/52453462/41153
-  function deltaE (rgbA, rgbB) {
+  function deltaE(rgbA, rgbB) {
     const labA = rgb2lab(rgbA)
     const labB = rgb2lab(rgbB)
     const deltaL = labA[0] - labB[0]
@@ -184,7 +184,7 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
     return i < 0 ? 0 : Math.sqrt(i)
   }
 
-  function rgb2lab (rgb) {
+  function rgb2lab(rgb) {
     let r = rgb[0] / 255; let g = rgb[1] / 255; let b = rgb[2] / 255; let x; let y; let z
     r = (r > 0.04045) ? Math.pow((r + 0.055) / 1.055, 2.4) : r / 12.92
     g = (g > 0.04045) ? Math.pow((g + 0.055) / 1.055, 2.4) : g / 12.92
@@ -300,6 +300,7 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
     return channel
   }
 
+  // maybe use the RISO now
   const extractCMYKChannel = (img, c) => {
     if (c === 'c' || c === 'cyan') c = 0
     if (c === 'm' || c === 'magenta') c = 1
@@ -316,33 +317,35 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
       // it should go to black or white, depending
 
       switch (c) {
-        case 0: // cyan
+        case 0: { // cyan
           const _c = (255 - p5.red(tmp))
           channel.pixels[i] = 0
           channel.pixels[i + 1] = 255
           channel.pixels[i + 2] = 255
           channel.pixels[i + 3] = _c
+        }
           break
 
-        case 1:
+        case 1: {
           const _m = (255 - p5.green(tmp))
           channel.pixels[i] = 255
           channel.pixels[i + 1] = 0
           channel.pixels[i + 2] = 255
           channel.pixels[i + 3] = _m
+        }
           break
 
-        case 2:
+        case 2: {
           const _y = (255 - p5.blue(tmp))
           channel.pixels[i] = 255
           channel.pixels[i + 1] = 255
           channel.pixels[i + 2] = 0
           channel.pixels[i + 3] = _y
+        }
           break
 
-        case 3:
+        case 3: {
           const _k = (255 - Math.floor(p5.brightness(tmp)))
-          // console.log(`img[3]: ${img.pixels[i + 3]} brightness: ${p5.brightness(tmp)} _k: ${_k}`)
           if (_k > 230) {
             channel.pixels[i] = 0
             channel.pixels[i + 1] = 0
@@ -354,8 +357,43 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
             channel.pixels[i + 2] = 255
             channel.pixels[i + 3] = 255
           }
+        }
           break
       }
+    }
+    channel.updatePixels()
+    return channel
+  }
+
+  // channel can be a number, a name, or a string of channels like 'cy' or 'cmk'
+  // NOTE: this goes to black, not the target color
+  // NOTE: the black extraction might work better in the other method. !!!
+  function extractCMYKChannelRiso(img, c) {
+    const desiredCMYKChannels = []
+    if (typeof c === 'number' && c < 4) {
+      desiredCMYKChannels.push(c)
+    } else {
+      c = c.toLowerCase()
+      if (c === 'cyan' || c.includes('c')) desiredCMYKChannels.push(0)
+      if (c === 'magenta' || c.includes('m')) desiredCMYKChannels.push(1)
+      if (c === 'yellow' || c.includes('y')) desiredCMYKChannels.push(2)
+      if (c === 'black' || c.includes('k')) desiredCMYKChannels.push(3)
+    }
+    const channel = p5.createImage(img.width, img.height)
+    img.loadPixels()
+    channel.loadPixels()
+    for (let i = 0; i < img.pixels.length; i += 4) {
+      const r = img.pixels[i]
+      const g = img.pixels[i + 1]
+      const b = img.pixels[i + 2]
+      const cmyk = rgb2cmyk(r, g, b)
+      let val = 0
+      desiredCMYKChannels.forEach((channelIndex) => { val += cmyk[channelIndex] })
+      val /= desiredCMYKChannels.length
+      channel.pixels[i] = val
+      channel.pixels[i + 1] = val
+      channel.pixels[i + 2] = val
+      channel.pixels[i + 3] = img.pixels[i + 3]
     }
     channel.updatePixels()
     return channel
@@ -521,7 +559,7 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
   ]
 
   class Riso extends p5Object.Graphics {
-    constructor (channelColor, w, h) {
+    constructor(channelColor, w, h) {
       if (!w) w = p5.width
       if (!h) h = p5.height
 
@@ -554,7 +592,7 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
       Riso.channels.push(this)
     }
 
-    export (filename) {
+    export(filename) {
       if (!filename) {
         if (this.channelName) {
           filename = this.channelName + '.png'
@@ -581,22 +619,22 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
       buffer.save(filename)
     }
 
-    cutout (imageMask) {
+    cutout(imageMask) {
       const img = this.get()
       img.cutout(imageMask)
       this.clear()
       this.copy(img, 0, 0, this.width, this.height, 0, 0, img.width, img.height)
     }
 
-    stroke (c) {
+    stroke(c) {
       this._stroke(this.channelColor[0], this.channelColor[1], this.channelColor[2], c)
     }
 
-    fill (c) {
+    fill(c) {
       this._fill(this.channelColor[0], this.channelColor[1], this.channelColor[2], c)
     }
 
-    image (img, x, y, w, h) {
+    image(img, x, y, w, h) {
       const alphaValue = p5.alpha(this.drawingContext.fillStyle) / 255
       const newImage = p5.createImage(img.width, img.height)
       img.loadPixels()
@@ -617,54 +655,54 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
       return newImage
     }
 
-    draw () {
+    draw() {
       p5.image(this, 0, 0)
     }
   }
 
-  function drawRiso () {
+  function drawRiso() {
     p5.blendMode(p5.MULTIPLY)
     Riso.channels.forEach(c => c.draw())
     p5.blendMode(p5.BLEND)
   }
 
-  function exportRiso () {
+  function exportRiso() {
     Riso.channels.forEach(c => c.export())
   }
 
-  function clearRiso () {
+  function clearRiso() {
     Riso.channels.forEach(c => c.clear())
   }
 
-  function risoNoFill () {
+  function risoNoFill() {
     Riso.channels.forEach(c => c.noFill())
   }
 
-  function risoNoStroke () {
+  function risoNoStroke() {
     Riso.channels.forEach(c => c.noStroke())
   }
 
   // frequency is gridSize !!!
-  function halftoneImage (img, shape, frequency, angle, intensity) {
+  function halftoneImage(img, shape, frequency, angle, intensity) {
     if (shape === undefined) shape = 'circle'
     if (frequency === undefined) frequency = 10
     if (angle === undefined) angle = 45
     if (intensity === undefined) intensity = 127
 
     const halftonePatterns = {
-      line (c, x, y, g, d) {
+      line(c, x, y, g, d) {
         c.rect(x, y, g, g * d)
       },
-      square (c, x, y, g, d) {
+      square(c, x, y, g, d) {
         c.rect(x, y, g * d, g * d)
       },
-      circle (c, x, y, g, d) {
+      circle(c, x, y, g, d) {
         c.ellipse(x, y, d * g, d * g)
       },
-      ellipse (c, x, y, g, d) {
+      ellipse(c, x, y, g, d) {
         c.ellipse(x, y, g * d * 0.7, g * d)
       },
-      cross (c, x, y, g, d) {
+      cross(c, x, y, g, d) {
         c.rect(x, y, g, g * d)
         c.rect(x, y, g * d, g)
       }

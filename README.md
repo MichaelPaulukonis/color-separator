@@ -20,10 +20,11 @@ and it's [example sketch](https://github.com/antiboredom/p5.riso/blob/master/tut
 - <https://codegolf.stackexchange.com/questions/114408/extract-an-rgb-channel-of-an-image>
 
 - I ran the bubblegum image through an online CMYK extractor and got a clean (but TINY) image, so there seem to be some flaws in the algorithm
+ - https://www.dcode.fr/cmyk-channels
+ - https://onlinejpgtools.com/extract-cmyk-channels-from-jpg
 
 - fluorescents from https://www.w3schools.com/colors/colors_crayola.asp
 - may look at https://www.shutterstock.com/blog/neon-color-palettes
-- https://codepen.io/FelixRilling/pen/qzfoc
 - https://www.fashiontrendsetter.com/content/color_trends/color-decoder/Color-Code-Neon.html
 - https://css-tricks.com/nerds-guide-color-web
 - https://app.contrast-finder.org/?lang=en
@@ -33,6 +34,11 @@ and it's [example sketch](https://github.com/antiboredom/p5.riso/blob/master/tut
 - https://www.rapidtables.com/web/css/css-color.html#yellow
 
 - [CMYK and filters](https://discourse.processing.org/t/best-way-to-do-this-tint-c-m-y-k/5317/11)
+
+- https://github.com/remistura/p5.palette
+- https://geeksoutofthebox.com/2020/09/13/a-color-palette-generator-in-p5-js/
+- https://colorjs.io/
+- https://tomekdev.com/posts/sorting-colors-in-js <= clusters
 
 ### monochrome 
 

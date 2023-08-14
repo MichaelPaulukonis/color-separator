@@ -18,5 +18,5 @@ module.exports = {
     'no-console': 'off',
     'import/order': 'off'
   },
-  ignorePatterns: ['/svg.canvas.js', '/nuxt.config.js']
+  ignorePatterns: ['/study/.**', '/nuxt.config.js']
 }

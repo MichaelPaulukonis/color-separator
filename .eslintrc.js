@@ -17,5 +17,6 @@ module.exports = {
   rules: {
     'no-console': 'off',
     'import/order': 'off'
-  }
+  },
+  ignorePatterns: ['/svg.canvas.js', '/nuxt.config.js']
 }

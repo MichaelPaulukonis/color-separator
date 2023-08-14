@@ -3,7 +3,7 @@ import { datestring, filenamer } from './filelib'
 
 let namer = null
 
-export default function Sketch({ p5Instance: p5, p5Object, params }) {
+export default function Sketch ({ p5Instance: p5, p5Object, params }) {
   const colorSep = {}
   const density = 1 // halftone (and other riso funcs) don't work with 2 NO IDEA
 
@@ -17,11 +17,11 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
     // params.img = p5.loadImage(require('~/assets/images/black.square.jpeg'))
   }
 
-  let canvas;
+  let canvas
 
   p5.setup = () => {
     window._p5Instance = p5
-    p5.pixelDensity(1)
+    p5.pixelDensity(density)
     params.width = params.img.width
     params.height = params.img.height
     canvas = p5.createCanvas(params.width, params.height)
@@ -109,8 +109,6 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
       extract = img
     }
     p5.background(255, 255, 255)
-    // p5.clear()
-    // p5.blendMode(p5.SUBTRACT)
     p5.image(extract, 0, 0)
   }
 
@@ -165,37 +163,41 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
     return [c * 255, m * 255, y * 255, k * 255]
   }
 
-  // plan - pick a color, and keeps stuff "near" it
-  // returns percentage comparison (0..100)
-  // strong reds can be "closer" to strong green than light greens
-  // which is not what I want
-  /// hey! what about the color sorter code??? !!!
-  function colorMeter(target, testColor) {
-    const targR = target[0]
-    const targG = target[1]
-    const targB = target[2]
-
-    const testR = testColor[0]
-    const testG = testColor[1]
-    const testB = testColor[2]
-
-    let p1 = (targR / 255) * 100
-    let p2 = (targG / 255) * 100
-    let p3 = (targB / 255) * 100
-
-    const perc1 = Math.round((p1 + p2 + p3) / 3)
-
-    p1 = (testR / 255) * 100
-    p2 = (testG / 255) * 100
-    p3 = (testB / 255) * 100
-
-    const perc2 = Math.round((p1 + p2 + p3) / 3)
-
-    const result = Math.abs(perc1 - perc2)
-    return result
+  // from https://stackoverflow.com/a/52453462/41153
+  function deltaE (rgbA, rgbB) {
+    const labA = rgb2lab(rgbA)
+    const labB = rgb2lab(rgbB)
+    const deltaL = labA[0] - labB[0]
+    const deltaA = labA[1] - labB[1]
+    const deltaB = labA[2] - labB[2]
+    const c1 = Math.sqrt(labA[1] * labA[1] + labA[2] * labA[2])
+    const c2 = Math.sqrt(labB[1] * labB[1] + labB[2] * labB[2])
+    const deltaC = c1 - c2
+    let deltaH = deltaA * deltaA + deltaB * deltaB - deltaC * deltaC
+    deltaH = deltaH < 0 ? 0 : Math.sqrt(deltaH)
+    const sc = 1.0 + 0.045 * c1
+    const sh = 1.0 + 0.015 * c1
+    const deltaLKlsl = deltaL / (1.0)
+    const deltaCkcsc = deltaC / (sc)
+    const deltaHkhsh = deltaH / (sh)
+    const i = deltaLKlsl * deltaLKlsl + deltaCkcsc * deltaCkcsc + deltaHkhsh * deltaHkhsh
+    return i < 0 ? 0 : Math.sqrt(i)
   }
 
-  // use colorMeter to see if we keep it
+  function rgb2lab (rgb) {
+    let r = rgb[0] / 255; let g = rgb[1] / 255; let b = rgb[2] / 255; let x; let y; let z
+    r = (r > 0.04045) ? Math.pow((r + 0.055) / 1.055, 2.4) : r / 12.92
+    g = (g > 0.04045) ? Math.pow((g + 0.055) / 1.055, 2.4) : g / 12.92
+    b = (b > 0.04045) ? Math.pow((b + 0.055) / 1.055, 2.4) : b / 12.92
+    x = (r * 0.4124 + g * 0.3576 + b * 0.1805) / 0.95047
+    y = (r * 0.2126 + g * 0.7152 + b * 0.0722) / 1.00000
+    z = (r * 0.0193 + g * 0.1192 + b * 0.9505) / 1.08883
+    x = (x > 0.008856) ? Math.pow(x, 1 / 3) : (7.787 * x) + 16 / 116
+    y = (y > 0.008856) ? Math.pow(y, 1 / 3) : (7.787 * y) + 16 / 116
+    z = (z > 0.008856) ? Math.pow(z, 1 / 3) : (7.787 * z) + 16 / 116
+    return [(116 * y) - 16, 500 * (x - y), 200 * (y - z)]
+  }
+
   const extractTargetColor = ({ img, color, extractColor, threshold }) => {
     const extractRGB = [
       p5.red(p5.color(extractColor)),
@@ -208,8 +210,8 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
     channel.loadPixels()
     for (let i = 0; i < img.pixels.length; i += 4) {
       const pixRGB = [img.pixels[i], img.pixels[i + 1], img.pixels[i + 2]]
-      const howClose = colorMeter(extractRGB, pixRGB) // returns 0..100
-      const comp = p5.map(howClose, 0, 100, 0, 255)
+      const distance = deltaE(extractRGB, pixRGB)
+      const comp = p5.map(distance, 0, 100, 0, 255)
       if (comp >= threshold) {
         // mayb e if average of a larger region? ugh.
         channel.pixels[i] = 255
@@ -519,7 +521,7 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
   ]
 
   class Riso extends p5Object.Graphics {
-    constructor(channelColor, w, h) {
+    constructor (channelColor, w, h) {
       if (!w) w = p5.width
       if (!h) h = p5.height
 
@@ -552,7 +554,7 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
       Riso.channels.push(this)
     }
 
-    export(filename) {
+    export (filename) {
       if (!filename) {
         if (this.channelName) {
           filename = this.channelName + '.png'
@@ -579,22 +581,22 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
       buffer.save(filename)
     }
 
-    cutout(imageMask) {
+    cutout (imageMask) {
       const img = this.get()
       img.cutout(imageMask)
       this.clear()
       this.copy(img, 0, 0, this.width, this.height, 0, 0, img.width, img.height)
     }
 
-    stroke(c) {
+    stroke (c) {
       this._stroke(this.channelColor[0], this.channelColor[1], this.channelColor[2], c)
     }
 
-    fill(c) {
+    fill (c) {
       this._fill(this.channelColor[0], this.channelColor[1], this.channelColor[2], c)
     }
 
-    image(img, x, y, w, h) {
+    image (img, x, y, w, h) {
       const alphaValue = p5.alpha(this.drawingContext.fillStyle) / 255
       const newImage = p5.createImage(img.width, img.height)
       img.loadPixels()
@@ -615,54 +617,54 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
       return newImage
     }
 
-    draw() {
+    draw () {
       p5.image(this, 0, 0)
     }
   }
 
-  function drawRiso() {
+  function drawRiso () {
     p5.blendMode(p5.MULTIPLY)
     Riso.channels.forEach(c => c.draw())
     p5.blendMode(p5.BLEND)
   }
 
-  function exportRiso() {
+  function exportRiso () {
     Riso.channels.forEach(c => c.export())
   }
 
-  function clearRiso() {
+  function clearRiso () {
     Riso.channels.forEach(c => c.clear())
   }
 
-  function risoNoFill() {
+  function risoNoFill () {
     Riso.channels.forEach(c => c.noFill())
   }
 
-  function risoNoStroke() {
+  function risoNoStroke () {
     Riso.channels.forEach(c => c.noStroke())
   }
 
   // frequency is gridSize !!!
-  function halftoneImage(img, shape, frequency, angle, intensity) {
+  function halftoneImage (img, shape, frequency, angle, intensity) {
     if (shape === undefined) shape = 'circle'
     if (frequency === undefined) frequency = 10
     if (angle === undefined) angle = 45
     if (intensity === undefined) intensity = 127
 
     const halftonePatterns = {
-      line(c, x, y, g, d) {
+      line (c, x, y, g, d) {
         c.rect(x, y, g, g * d)
       },
-      square(c, x, y, g, d) {
+      square (c, x, y, g, d) {
         c.rect(x, y, g * d, g * d)
       },
-      circle(c, x, y, g, d) {
+      circle (c, x, y, g, d) {
         c.ellipse(x, y, d * g, d * g)
       },
-      ellipse(c, x, y, g, d) {
+      ellipse (c, x, y, g, d) {
         c.ellipse(x, y, g * d * 0.7, g * d)
       },
-      cross(c, x, y, g, d) {
+      cross (c, x, y, g, d) {
         c.rect(x, y, g, g * d)
         c.rect(x, y, g * d, g)
       }

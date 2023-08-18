@@ -40,6 +40,8 @@ and it's [example sketch](https://github.com/antiboredom/p5.riso/blob/master/tut
 - https://colorjs.io/
 - https://tomekdev.com/posts/sorting-colors-in-js <= clusters
 
+- https://www.reddit.com/r/SCREENPRINTING/comments/8qaadd/cmyk_angles_guide_for_color_separation/
+
 ### monochrome 
 
 - https://codepen.io/mikeurbonas/pen/poJKKvB

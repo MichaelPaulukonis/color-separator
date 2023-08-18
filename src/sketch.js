@@ -95,7 +95,7 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
 
     rso.image(halftoned, 0, 0)
     drawRiso()
-    halftoned.remove()
+    // halftoned.remove()
   }
 
   const oneChannel = (img, channel) => {
@@ -104,7 +104,18 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
       extract = extractRGBChannel(img, channel)
       // extract = extractSingleColor({ img, targChnl: channel })
     } else if (['c', 'y', 'm', 'k'].indexOf(channel) > -1) {
+      const color = channel === 'c' ? 'cyan'
+        : channel === 'y' ? 'yellow'
+        : channel === 'm' ? 'magenta'
+        : 'black'
+      const rso = new Riso(color)
+      p5.background(255)
+      clearRiso()
       extract = extractCMYKChannelRiso(img, channel)
+      rso.image(extract, 0, 0)
+      drawRiso()
+      // extract.remove()
+      return
     } else {
       extract = img
     }
@@ -382,19 +393,26 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
     const channel = p5.createImage(img.width, img.height)
     img.loadPixels()
     channel.loadPixels()
+    let m = []
     for (let i = 0; i < img.pixels.length; i += 4) {
       const r = img.pixels[i]
       const g = img.pixels[i + 1]
       const b = img.pixels[i + 2]
-      const cmyk = rgb2cmyk(r, g, b)
+      let cmyk = rgb2cmyk(r, g, b)
+      if (r === 0 && g === 0 && b === 0) {
+        cmyk = [0, 0, 0, 0]
+      }
       let val = 0
       desiredCMYKChannels.forEach((channelIndex) => { val += cmyk[channelIndex] })
       val /= desiredCMYKChannels.length
-      channel.pixels[i] = val
-      channel.pixels[i + 1] = val
-      channel.pixels[i + 2] = val
+      // now we threshold it?
+      const threshed = val > params.threshold ? 255 : 0
+      channel.pixels[i] = threshed
+      channel.pixels[i + 1] = threshed
+      channel.pixels[i + 2] = threshed
       channel.pixels[i + 3] = img.pixels[i + 3]
     }
+    console.log(m.join(' '))
     channel.updatePixels()
     return channel
   }
@@ -476,6 +494,9 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
   colorSep.savit = savit
 
   const RISOCOLORS = [
+    { name: 'MAGENTA', color: [255, 0, 255] },
+    { name: 'CYAN', color: [0, 255, 255] },
+    { name: 'YELLOW', color: [255, 255, 0] },
     { name: 'BLACK', color: [0, 0, 0] },
     { name: 'BURGUNDY', color: [145, 78, 114] },
     { name: 'BLUE', color: [0, 120, 191] },
@@ -489,7 +510,7 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
     { name: 'HUNTERGREEN', color: [64, 112, 96] },
     { name: 'RED', color: [255, 102, 94] },
     { name: 'BROWN', color: [146, 95, 82] },
-    { name: 'YELLOW', color: [255, 232, 0] },
+    // { name: 'YELLOW', color: [255, 232, 0] },
     { name: 'MARINERED', color: [210, 81, 94] },
     { name: 'ORANGE', color: [255, 108, 47] },
     { name: 'FLUORESCENTPINK', color: [255, 72, 176] },

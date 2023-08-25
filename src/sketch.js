@@ -10,8 +10,8 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
   p5.preload = () => {
     // params.img = p5.loadImage(require('~/assets/images/sour_sweets05.jpg'))
     // params.img = p5.loadImage(require('~/assets/images/nancy.bubblegum.jpg'))
-    params.img = p5.loadImage(require('~/assets/images/CMYK-Chart.png'))
-    // params.img = p5.loadImage(require('~/assets/images/small.cmyk.png'))
+    // params.img = p5.loadImage(require('~/assets/images/CMYK-Chart.png'))
+    params.img = p5.loadImage(require('~/assets/images/small.cmyk.png'))
     // params.img = p5.loadImage(require('~/assets/images/Rain_blo_1_cent_d.jpg'))
     // params.img = p5.loadImage(require('~/assets/images/joe.cool.jpeg'))
     // params.img = p5.loadImage(require('~/assets/images/black.square.jpeg'))
@@ -104,10 +104,13 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
       extract = extractRGBChannel(img, channel)
       // extract = extractSingleColor({ img, targChnl: channel })
     } else if (['c', 'y', 'm', 'k'].indexOf(channel) > -1) {
-      const color = channel === 'c' ? 'cyan'
-        : channel === 'y' ? 'yellow'
-        : channel === 'm' ? 'magenta'
-        : 'black'
+      const color = channel === 'c'
+        ? 'cyan'
+        : channel === 'y'
+          ? 'yellow'
+          : channel === 'm'
+            ? 'magenta'
+            : 'black'
       const rso = new Riso(color)
       p5.background(255)
       clearRiso()
@@ -393,7 +396,7 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
     const channel = p5.createImage(img.width, img.height)
     img.loadPixels()
     channel.loadPixels()
-    let m = []
+    const m = []
     for (let i = 0; i < img.pixels.length; i += 4) {
       const r = img.pixels[i]
       const g = img.pixels[i + 1]
@@ -703,31 +706,95 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
     Riso.channels.forEach(c => c.noStroke())
   }
 
-  // frequency is gridSize !!!
-  function halftoneImage(img, shape, frequency, angle, intensity) {
+  const halftonePatterns = {
+    line(c, x, y, g, d) {
+      c.rect(x, y, g, g * d)
+    },
+    square(c, x, y, g, d) {
+      c.rect(x, y, g * d, g * d)
+    },
+    circle(c, x, y, g, d) {
+      c.ellipse(x, y, d * g, d * g)
+    },
+    ellipse(c, x, y, g, d) {
+      c.ellipse(x, y, g * d * 0.7, g * d)
+    },
+    cross(c, x, y, g, d) {
+      c.rect(x, y, g, g * d)
+      c.rect(x, y, g * d, g)
+    }
+  }
+
+  function halftoneImage(img, shape, gridSize, angle, threshold) {
+    if (shape === undefined) shape = 'circle'
+    if (gridSize === undefined) gridSize = 10
+    if (angle === undefined) angle = 45
+    if (threshold === undefined) threshold = 127
+
+    const patternFunction = typeof shape === 'function' ? shape : halftonePatterns[shape]
+
+    const w = img.width
+    const h = img.height
+
+    const rotatedCanvas = p5.createGraphics(img.width * 2, img.height * 2)
+    rotatedCanvas.background(255)
+    rotatedCanvas.imageMode(p5.CENTER)
+    rotatedCanvas.push()
+    rotatedCanvas.translate(img.width, img.height)
+    rotatedCanvas.rotate(-angle)
+    rotatedCanvas.image(img, 0, 0)
+    rotatedCanvas.pop()
+    rotatedCanvas.loadPixels()
+
+    const out = p5.createGraphics(w * 2, h * 2)
+    out.background(255)
+    out.ellipseMode(p5.CORNER)
+    out.rectMode(p5.CENTER)
+    out.fill(0)
+    out.noStroke()
+
+    // TODO: reduce the sample image by gridSize
+    // then each pixel is the avg of target area
+    const avgs = []
+    for (let x = 0; x < w * 2; x += gridSize) {
+      for (let y = 0; y < h * 2; y += gridSize) {
+        const targPixel = (x + y * w * 2) * 4
+
+        let r = rotatedCanvas.pixels[targPixel]
+        let g = rotatedCanvas.pixels[targPixel + 1]
+        let b = rotatedCanvas.pixels[targPixel + 2]
+
+        let luma = (0.299 * r + 0.587 * g + 0.114 * b)
+        if (luma < 255) {
+          const darkness = (255 - luma) / 255
+          patternFunction(out, x, y, gridSize, darkness)
+        }
+      }
+    }
+    console.log(avgs.join(','))
+    rotatedCanvas.background(255)
+    rotatedCanvas.push()
+    rotatedCanvas.translate(w, h)
+    rotatedCanvas.rotate(angle)
+    rotatedCanvas.image(out, 0, 0)
+    rotatedCanvas.pop()
+
+    const result = rotatedCanvas.get(w / 2, h / 2, w, h)
+    rotatedCanvas.remove()
+    out.remove()
+
+    if (threshold === false) {
+      return result
+    } else {
+      return ditherImage(result, 'none', threshold)
+    }
+  }
+
+  function halftoneImageRiso(img, shape, frequency, angle, intensity) {
     if (shape === undefined) shape = 'circle'
     if (frequency === undefined) frequency = 10
     if (angle === undefined) angle = 45
     if (intensity === undefined) intensity = 127
-
-    const halftonePatterns = {
-      line(c, x, y, g, d) {
-        c.rect(x, y, g, g * d)
-      },
-      square(c, x, y, g, d) {
-        c.rect(x, y, g * d, g * d)
-      },
-      circle(c, x, y, g, d) {
-        c.ellipse(x, y, d * g, d * g)
-      },
-      ellipse(c, x, y, g, d) {
-        c.ellipse(x, y, g * d * 0.7, g * d)
-      },
-      cross(c, x, y, g, d) {
-        c.rect(x, y, g, g * d)
-        c.rect(x, y, g * d, g)
-      }
-    }
 
     const patternFunction = typeof shape === 'function' ? shape : halftonePatterns[shape]
 
@@ -752,17 +819,22 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
     out.noStroke()
 
     const gridsize = frequency
-
+    const avgs = []
     for (let x = 0; x < w * 2; x += gridsize) {
       for (let y = 0; y < h * 2; y += gridsize) {
-        const avg = rotatedCanvas.pixels[(x + y * w * 2) * 4]
-
+        const targPixel = (x + y * w * 2) * 4
+        const avg = rotatedCanvas.pixels[targPixel] // how can this be an AVERAGE ????? it's one pixel!
+        // oh, the original riso would have passed in a black image
+        const quad = [rotatedCanvas.pixels[targPixel], rotatedCanvas.pixels[targPixel - 1], rotatedCanvas.pixels[targPixel - 2], rotatedCanvas.pixels[targPixel - 3]]
+        avgs.push(quad)
         if (avg < 255) {
+          // avgs.push(avg)
           const darkness = (255 - avg) / 255
           patternFunction(out, x, y, gridsize, darkness)
         }
       }
     }
+    console.log(avgs.join(','))
     rotatedCanvas.background(255)
     rotatedCanvas.push()
     rotatedCanvas.translate(w, h)

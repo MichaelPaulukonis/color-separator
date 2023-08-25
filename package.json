@@ -1,6 +1,6 @@
 {
   "name": "color-separator",
-  "version": "1.0.64",
+  "version": "1.0.65",
   "description": "Color channel separations and other tools, using p5js",
   "main_orig": "index.html/sketch.js",
   "main": "src/index.js",

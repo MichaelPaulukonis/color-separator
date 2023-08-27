@@ -3,21 +3,26 @@ import { datestring, filenamer } from './filelib'
 
 let namer = null
 
+// TODO: use a smaller display canvas
+// larger off-screen render for export
+
 export default function Sketch({ p5Instance: p5, p5Object, params }) {
   const colorSep = {}
   const density = 1 // halftone (and other riso funcs) don't work with 2 NO IDEA
 
   p5.preload = () => {
-    // params.img = p5.loadImage(require('~/assets/images/sour_sweets05.jpg'))
+    // drop-down with ALL local sample images ???
+    params.img = p5.loadImage(require('~/assets/images/sour_sweets05.jpg'))
     // params.img = p5.loadImage(require('~/assets/images/nancy.bubblegum.jpg'))
     // params.img = p5.loadImage(require('~/assets/images/CMYK-Chart.png'))
-    params.img = p5.loadImage(require('~/assets/images/small.cmyk.png'))
+    // params.img = p5.loadImage(require('~/assets/images/small.cmyk.png'))
     // params.img = p5.loadImage(require('~/assets/images/Rain_blo_1_cent_d.jpg'))
     // params.img = p5.loadImage(require('~/assets/images/joe.cool.jpeg'))
     // params.img = p5.loadImage(require('~/assets/images/black.square.jpeg'))
   }
 
   let canvas
+  let backgroundStorage
 
   p5.setup = () => {
     window._p5Instance = p5
@@ -27,15 +32,20 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
     canvas = p5.createCanvas(params.width, params.height)
     canvas.drop(gotFile)
     canvas.parent('#sketch-holder')
+    backgroundStorage = p5.createGraphics(params.width, params.height)
+    backgroundStorage.background('white')
+    backgroundStorage.image(params.img, 0, 0)
     p5.background('white')
     p5.noLoop()
     p5.image(params.img, 0, 0)
   }
 
   const imageReady = (img) => {
+    backgroundStorage = p5.createGraphics(img.width, img.height)
     p5.resizeCanvas(img.width, img.height)
     params.img.loadPixels()
     p5.image(img, 0, 0)
+    backgroundStorage.image(img, 0, 0)
     params.imageLoaded = true
   }
 

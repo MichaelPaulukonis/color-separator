@@ -12,7 +12,7 @@ dat-gui(close-text="Close controls", open-text="Open controls", close-position="
 </template>
 
 <script>
-import { named } from '../src/colors.js'
+import { named, neons, allColors } from '../src/colors.js'
 
 const dithers = [ 'none', 'bayer', 'floydsteinberg', 'Atkinson' ]
 
@@ -28,8 +28,8 @@ export default {
   },
   data() {
     return {
-      colors: Object.keys(named).map(c => ({ name: c, value: c })),
-      renderColor: Object.keys(named)[0],
+      colors: Object.keys(allColors).map(c => ({ name: c, value: c })),
+      renderColor: Object.keys(allColors)[0],
       targetColor: 'rgb(53,196,73)', 
       ditherTypes: dithers.map(d => ({ name: d, value: d})),
       ditherType: dithers[0],
@@ -61,7 +61,7 @@ export default {
       this.$emit('updateThreshold', val)
     },
     renderColor: function (val) {
-      this.$emit('updateColor', named[val])
+      this.$emit('updateColor', allColors[val])
     },
     channel: function (val) {
       this.$emit('updateChannel', val)

@@ -75,7 +75,8 @@ export default {
       height: 500,
       currChannel: '',
       img: null,
-      imageLoaded: false
+      imageLoaded: false,
+      ratio: 1
     }
 
     const builder = (p5Instance) => {

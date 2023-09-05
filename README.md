@@ -42,6 +42,8 @@ and it's [example sketch](https://github.com/antiboredom/p5.riso/blob/master/tut
 
 - https://www.reddit.com/r/SCREENPRINTING/comments/8qaadd/cmyk_angles_guide_for_color_separation/
 
+- [different color filters](https://idmnyu.github.io/p5.js-image/Filters/index.html)
+
 ### monochrome 
 
 - https://codepen.io/mikeurbonas/pen/poJKKvB

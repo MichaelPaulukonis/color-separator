@@ -38,7 +38,7 @@ export default class Undo {
 
 class CircImgCollection {
   constructor (renderFunc, amountOfImages) {
-    let current = 0
+    let current = -1
     const imgs = []
     const amount = amountOfImages
 
@@ -52,20 +52,11 @@ class CircImgCollection {
     }
     this.store = (newImg) => {
       newImg.loadPixels()
-      imgs[current] = newImg
       current = (current + 1) % amount
+      imgs[current] = newImg
     }
 
     this.show = () => {
-      // I don't think it will need ALL of this (was _maybe_ required back in polychrome)
-      // originally, newImg was a p5.Graphics object
-      // renderGraphic.push()
-      // renderGraphic.translate(0, 0)
-      // renderGraphic.resetMatrix()
-      // renderGraphic.image(imgs[current], 0, 0)
-      // renderFunc(renderGraphic) // to hit the external renderer
-      // renderGraphic.pop()
-      // I'm off by one, somehow.....
       renderFunc(imgs[current])
     }
   }

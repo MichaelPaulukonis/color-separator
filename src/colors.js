@@ -39,9 +39,13 @@ export const neons = {
   "[204, 0, 255]": [204, 0, 255],
   "[110, 13, 208]": [110, 13, 208],
   "[153, 0, 255]": [153, 0, 255]
-  }
+}
 
 export const named = {
+  'MAGENTA': [255, 0, 255],
+  'CYAN': [0, 255, 255],
+  'YELLOW': [255, 255, 0],
+  // YELLOW: [255, 232, 0], // original riso def
   BLACK: [0, 0, 0],
   FLUORESCENTGREEN: [68, 214, 44],
   FLUORESCENTRED: [255, 76, 101],
@@ -109,7 +113,6 @@ export const named = {
   FLUORESCENTPINK: [255, 72, 176],
   ORANGE: [255, 108, 47],
   MARINERED: [210, 81, 94],
-  YELLOW: [255, 232, 0],
   BROWN: [146, 95, 82],
   RED: [255, 102, 94],
   HUNTERGREEN: [64, 112, 96],
@@ -124,4 +127,4 @@ export const named = {
   BURGUNDY: [145, 78, 114]
 }
 
-export const allColors = { ...neons, ...named}
+export const allColors = { ...neons, ...named }

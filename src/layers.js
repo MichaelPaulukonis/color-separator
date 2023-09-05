@@ -1,9 +1,12 @@
+import Undo from './undo.js'
+
 export default class Layers {
-  constructor(p5Object, dl, temp) {
+  constructor(p5Object, sl = null, temp = null) {
     this.p5Object = p5Object
-    this.drawingLayer = dl   // p5.Graphics, full-size
+    this.storageLayer = sl   // p5.Graphics, full-size
     this.tempLayer = temp
-    // this.displayLayer
+    this.ratio = 1
+    this.history = new Undo(this.renderRaw, 10)
   }
 
   // TODO: integrate the visible, scaled canvas
@@ -12,8 +15,6 @@ export default class Layers {
   // and it also handles history!
   // since that is a layer-thing
 
-  // TODO: only need to calculate once
-  // this is probably a minor optimization
   getScale = (image) => {
     const displayLarge = { width: 800, height: 800 }
     const displaySmall = { width: 200, height: 200 }
@@ -33,25 +34,30 @@ export default class Layers {
 
   // snapshot-free
   renderRaw = (img) => {
-    // why create anew ?????
-    // backgroundStorage = p5.createGraphics(img.width, img.height)
-    backgroundStorage.blendMode(p5.BLEND)
-    backgroundStorage.background('white')
-    backgroundStorage.image(img, 0, 0)
-    const r = getScale(img)
-    p5.resizeCanvas(img.width * r, img.height * r) // no need every time!
-    p5.background('white')
-    p5.blendMode(p5.BLEND)
-    p5.image(img, 0, 0, img.width * r, img.height * r)
-    params.ratio = r
-    params.imageLoaded = true
+    this.storageLayer.blendMode(this.p5Object.BLEND)
+    this.storageLayer.background('white')
+    this.storageLayer.image(img, 0, 0)
+    const r = this.ratio
+    this.p5Object.background('white')
+    this.p5Object.blendMode(this.p5Object.BLEND)
+    this.p5Object.image(img, 0, 0, img.width * r, img.height * r)
+    // params.imageLoaded = true // THIS needs to be passed back, yeah?
   }
 
   render = (img) => {
-    history.snapshot(img)
-    renderRaw(img)
+    this.history.snapshot(img) // whoops, not in here, either
+    this.renderRaw(img)
   }
 
+  imageReady = (img) => {
+    img.loadPixels() // ?????
+    this.storageLayer = this.p5Object.createGraphics(img.width, img.height)
+    this.tempLayer = this.p5Object.createGraphics(img.width, img.height)
+    const r = this.getScale(img)
+    this.p5Object.resizeCanvas(img.width * r, img.height * r)
+    this.ratio = r // aaaargh, how to pass back (do we need to ?!?!?)
+    this.render(img)
+  }
 
   /**
    * Returns a p5.Graphics object that is a copy of the current drawing
@@ -61,7 +67,6 @@ export default class Layers {
     // but whatevs.....
     const layer = this.p5Object.createGraphics(this.p5Object.width, this.p5Object.height)
     layer.pixelDensity(this.p5Object.pixelDensity())
-    // layer.image(this.p5.get(), 0, 0) // makes things blurry??
     layer.image(this.p5Object, 0, 0)
     return layer
   }
@@ -74,15 +79,5 @@ export default class Layers {
     g.pixelDensity(this.p5Object.pixelDensity())
     g.image(img, 0, 0)
     return g
-  }
-
-  setFont(font) {
-    this.p5Object.textFont(font)
-    this.drawingLayer.textFont(font)
-  }
-
-  textSize(size) {
-    this.p5Object.textSize(size)
-    this.drawingLayer.textSize(size)
   }
 }

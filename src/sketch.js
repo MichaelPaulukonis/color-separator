@@ -1,8 +1,7 @@
 import saveAs from 'file-saver'
 import { datestring, filenamer } from './filelib'
-// import { allColors as RISOCOLORS } from '../src/colors.js'
-import { allColors } from '../src/colors.js'
-
+import { allColors as RISOCOLORS } from '../src/colors.js'
+import Layers from './layers'
 import Undo from './undo.js'
 
 let namer = null
@@ -10,7 +9,7 @@ let namer = null
 export default function Sketch({ p5Instance: p5, p5Object, params }) {
   const colorSep = {}
   const density = 1 // halftone (and other riso funcs) don't work with 2 NO IDEA
-  let history
+  // let history
 
   p5.preload = () => {
     // drop-down with ALL local sample images ???
@@ -36,8 +35,9 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
     canvas = p5.createCanvas(params.width, params.height)
     canvas.drop(gotFile)
     canvas.parent('#sketch-holder')
-    history = new Undo(renderRaw, 10)
-    imageReady(params.img)
+    // history = new Undo(renderRaw, 10)
+    layers = new Layers(p5)
+    layers.imageReady(params.img)
     p5.noLoop()
   }
 
@@ -57,39 +57,39 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
     return r;
   }
 
-  const imageReady = (img) => {
-    img.loadPixels() // ?????
-    backgroundStorage = p5.createGraphics(img.width, img.height)
-    tempLayer = p5.createGraphics(img.width, img.height)
-    const r = getScale(img)
-    p5.resizeCanvas(img.width * r, img.height * r)
-    params.ratio = r
-    render(img)
-  }
+  // const imageReady = (img) => {
+  //   img.loadPixels() // ?????
+  //   backgroundStorage = p5.createGraphics(img.width, img.height)
+  //   tempLayer = p5.createGraphics(img.width, img.height)
+  //   const r = getScale(img)
+  //   p5.resizeCanvas(img.width * r, img.height * r)
+  //   params.ratio = r
+  //   render(img)
+  // }
 
   const gotFile = (file) => {
     if (file && file.type === 'image') {
       params.imageLoaded = false
-      params.img = p5.loadImage(file.data, imageReady)
+      params.img = p5.loadImage(file.data, layers.imageReady)
     } else {
       console.log('Not an image file!')
     }
   }
 
   // snapshot-free
-  const renderRaw = (img) => {
-    backgroundStorage.blendMode(p5.BLEND)
-    backgroundStorage.background('white')
-    backgroundStorage.image(img, 0, 0)
-    p5.background('white')
-    p5.blendMode(p5.BLEND)
-    p5.image(img, 0, 0, img.width * params.ratio, img.height * params.ratio)
-    params.imageLoaded = true
-  }
+  // const renderRaw = (img) => {
+  //   backgroundStorage.blendMode(p5.BLEND)
+  //   backgroundStorage.background('white')
+  //   backgroundStorage.image(img, 0, 0)
+  //   p5.background('white')
+  //   p5.blendMode(p5.BLEND)
+  //   p5.image(img, 0, 0, img.width * params.ratio, img.height * params.ratio)
+  //   params.imageLoaded = true
+  // }
 
   const render = (img) => {
-    history.snapshot(img)
-    renderRaw(img)
+    layers.history.snapshot(img)
+    layers.renderRaw(img)
   }
 
   p5.mousePressed = () => {
@@ -103,7 +103,7 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
 
   p5.keyTyped = () => {
     if (p5.key === 'u') {
-      history.undo()
+      layers.history.undo()
     } else if (p5.key === 'a') {
       const channel = params.channel[0] // first letter (ugh)
       const color = params.color
@@ -125,7 +125,7 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
     } else if (p5.key === 's') {
       savit()
     } else if (p5.key === 'h') {
-      const img = backgroundStorage.get()
+      const img = layers.storageLayer.get()
       halftoner({ img, pattern: params.halftonePattern, threshold: params.threshold, angle: params.halftoneAngle, size: params.halftoneSize })
     }
   }
@@ -133,7 +133,7 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
   // somewhat picky about threshold
   // when (re)processing a single-color image often goes to all-white
   const halftoner = ({ img, pattern, threshold, angle, size }) => {
-    const rso = new Riso(params.color, img.width, img.height, p5, allColors)
+    const rso = new Riso(params.color, img.width, img.height, p5)
     p5.background(255)
     clearRiso()
 
@@ -155,11 +155,10 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
           : channel === 'm'
             ? 'MAGENTA'
             : 'BLACK'
-      // TODO: translate to color values do!
-      const rso = new Riso(color, img.width, img.height, p5, allColors)
+      const rso = new Riso(color, img.width, img.height, p5)
       clearRiso()
-      extract = extractCMYKChannelRiso(img, channel) 
-      rso.image(extract, 0, 0) // this should be the render color?
+      extract = extractCMYKChannelRiso(img, channel)
+      rso.image(extract, 0, 0)
       drawRiso()
       return
     } else {
@@ -176,7 +175,7 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
   const savit = () => {
     console.log('saving canvas: ')
     namer = filenamer(`color-sep.${params.currChannel}.${datestring()}`)
-    saver(backgroundStorage.drawingContext.canvas, namer() + '.png')
+    saver(layers.storageLayer.drawingContext.canvas, namer() + '.png')
   }
 
   p5.draw = () => {
@@ -537,19 +536,18 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
   colorSep.savit = savit
 
   class Riso extends p5Object.Graphics {
-    constructor(channelColor, w, h, p5, colorList) {
+    constructor(channelColor, w, h, p5) {
       if (!w) w = p5.width
       if (!h) h = p5.height
 
       super(w, h, null, p5)
 
       let foundColor
-      this.RISOCOLORS = colorList
 
       if (typeof channelColor === 'string') {
-        console.log(this.RISOCOLORS)
-        console.log(channelColor, this.RISOCOLORS[channelColor])
-        foundColor = this.RISOCOLORS[channelColor] || 'BLACK'
+        console.log(RISOCOLORS)
+        console.log(channelColor, RISOCOLORS[channelColor])
+        foundColor = RISOCOLORS[channelColor] || 'BLACK'
       }
 
       if (foundColor) {
@@ -609,24 +607,20 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
     }
 
     draw() {
-      // in the original implementation this was an extended Graphics object
-      // with it's own renderer
-      // it probably should be again sigh
-      tempLayer.image(this, 0, 0)
-      // renderRaw(this)
+      layers.tempLayer.image(this, 0, 0)
     }
   }
 
   function drawRiso() {
     // clearRiso()
-    tempLayer.background('white')
-    tempLayer.blendMode(p5.MULTIPLY)
+    layers.tempLayer.background('white')
+    layers.tempLayer.blendMode(p5.MULTIPLY)
     // for my purposes I don't need multiple channels
     // ... NOW ....
     // but it could be interesting ugh
     Riso.channels.forEach(c => c.draw())
-    tempLayer.blendMode(p5.BLEND)
-    render(tempLayer)
+    layers.tempLayer.blendMode(p5.BLEND)
+    layers.render(layers.tempLayer)
   }
 
   function clearRiso() {

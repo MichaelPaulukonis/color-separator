@@ -9,15 +9,14 @@ let namer = null
 export default function Sketch({ p5Instance: p5, p5Object, params }) {
   const colorSep = {}
   const density = 1 // halftone (and other riso funcs) don't work with 2 NO IDEA
-  // let history
 
   p5.preload = () => {
     // drop-down with ALL local sample images ???
     // params.img = p5.loadImage(require('~/assets/images/sour_sweets05.jpg'))
     // params.img = p5.loadImage(require('~/assets/images/nancy.bubblegum.jpg'))
     // params.img = p5.loadImage(require('~/assets/images/CMYK-Chart.png'))
-    params.img = p5.loadImage(require('~/assets/images/small.cmyk.png'))
-    // params.img = p5.loadImage(require('~/assets/images/Rain_blo_1_cent_d.jpg'))
+    // params.img = p5.loadImage(require('~/assets/images/small.cmyk.png'))
+    params.img = p5.loadImage(require('~/assets/images/Rain_blo_1_cent_d.jpg'))
     // params.img = p5.loadImage(require('~/assets/images/joe.cool.jpeg'))
     // params.img = p5.loadImage(require('~/assets/images/black.square.jpeg'))
   }
@@ -35,7 +34,6 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
     canvas = p5.createCanvas(params.width, params.height)
     canvas.drop(gotFile)
     canvas.parent('#sketch-holder')
-    // history = new Undo(renderRaw, 10)
     layers = new Layers(p5)
     layers.imageReady(params.img)
     p5.noLoop()
@@ -57,16 +55,6 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
     return r;
   }
 
-  // const imageReady = (img) => {
-  //   img.loadPixels() // ?????
-  //   backgroundStorage = p5.createGraphics(img.width, img.height)
-  //   tempLayer = p5.createGraphics(img.width, img.height)
-  //   const r = getScale(img)
-  //   p5.resizeCanvas(img.width * r, img.height * r)
-  //   params.ratio = r
-  //   render(img)
-  // }
-
   const gotFile = (file) => {
     if (file && file.type === 'image') {
       params.imageLoaded = false
@@ -75,17 +63,6 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
       console.log('Not an image file!')
     }
   }
-
-  // snapshot-free
-  // const renderRaw = (img) => {
-  //   backgroundStorage.blendMode(p5.BLEND)
-  //   backgroundStorage.background('white')
-  //   backgroundStorage.image(img, 0, 0)
-  //   p5.background('white')
-  //   p5.blendMode(p5.BLEND)
-  //   p5.image(img, 0, 0, img.width * params.ratio, img.height * params.ratio)
-  //   params.imageLoaded = true
-  // }
 
   const render = (img) => {
     layers.history.snapshot(img)
@@ -612,12 +589,8 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
   }
 
   function drawRiso() {
-    // clearRiso()
     layers.tempLayer.background('white')
     layers.tempLayer.blendMode(p5.MULTIPLY)
-    // for my purposes I don't need multiple channels
-    // ... NOW ....
-    // but it could be interesting ugh
     Riso.channels.forEach(c => c.draw())
     layers.tempLayer.blendMode(p5.BLEND)
     layers.render(layers.tempLayer)

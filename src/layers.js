@@ -9,12 +9,6 @@ export default class Layers {
     this.history = new Undo(this.renderRaw, 10)
   }
 
-  // TODO: integrate the visible, scaled canvas
-  // the hidden full-size canvas
-  // and any other temporary drawing layers (channels)
-  // and it also handles history!
-  // since that is a layer-thing
-
   getScale = (image) => {
     const displayLarge = { width: 800, height: 800 }
     const displaySmall = { width: 200, height: 200 }
@@ -41,11 +35,10 @@ export default class Layers {
     this.p5Object.background('white')
     this.p5Object.blendMode(this.p5Object.BLEND)
     this.p5Object.image(img, 0, 0, img.width * r, img.height * r)
-    // params.imageLoaded = true // THIS needs to be passed back, yeah?
   }
 
   render = (img) => {
-    this.history.snapshot(img) // whoops, not in here, either
+    this.history.snapshot(img)
     this.renderRaw(img)
   }
 
@@ -55,7 +48,7 @@ export default class Layers {
     this.tempLayer = this.p5Object.createGraphics(img.width, img.height)
     const r = this.getScale(img)
     this.p5Object.resizeCanvas(img.width * r, img.height * r)
-    this.ratio = r // aaaargh, how to pass back (do we need to ?!?!?)
+    this.ratio = r
     this.render(img)
   }
 
@@ -63,8 +56,6 @@ export default class Layers {
    * Returns a p5.Graphics object that is a copy of the current drawing
    */
   copy() {
-    // this is copying, somewhat, the initLayer code
-    // but whatevs.....
     const layer = this.p5Object.createGraphics(this.p5Object.width, this.p5Object.height)
     layer.pixelDensity(this.p5Object.pixelDensity())
     layer.image(this.p5Object, 0, 0)

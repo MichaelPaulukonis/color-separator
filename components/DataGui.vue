@@ -80,7 +80,7 @@ export default {
 </script>
 
 <style scoped>
-#about {
-  margin: 10px;
+ul > li {
+  margin-bottom: 0;
 }
 </style>

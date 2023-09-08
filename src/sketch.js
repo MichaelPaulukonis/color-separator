@@ -2,28 +2,41 @@ import saveAs from 'file-saver'
 import { datestring, filenamer } from './filelib'
 import { allColors as RISOCOLORS } from '../src/colors.js'
 import Layers from './layers'
-import Undo from './undo.js'
 
 let namer = null
 
 export default function Sketch({ p5Instance: p5, p5Object, params }) {
   const colorSep = {}
   const density = 1 // halftone (and other riso funcs) don't work with 2 NO IDEA
+  let ditherTemplates = []
+  let dithers = []
+  let images = []
 
   p5.preload = () => {
-    // drop-down with ALL local sample images ???
-    // params.img = p5.loadImage(require('~/assets/images/sour_sweets05.jpg'))
-    // params.img = p5.loadImage(require('~/assets/images/nancy.bubblegum.jpg'))
-    // params.img = p5.loadImage(require('~/assets/images/CMYK-Chart.png'))
-    // params.img = p5.loadImage(require('~/assets/images/small.cmyk.png'))
     params.img = p5.loadImage(require('~/assets/images/Rain_blo_1_cent_d.jpg'))
-    // params.img = p5.loadImage(require('~/assets/images/joe.cool.jpeg'))
-    // params.img = p5.loadImage(require('~/assets/images/black.square.jpeg'))
+
+    // drop-down with ALL local sample images ???
+    images = [
+      p5.loadImage(require('~/assets/images/sour_sweets05.jpg')),
+      p5.loadImage(require('~/assets/images/nancy.bubblegum.jpg')),
+      p5.loadImage(require('~/assets/images/CMYK-Chart.png')),
+      p5.loadImage(require('~/assets/images/small.cmyk.png')),
+      p5.loadImage(require('~/assets/images/Rain_blo_1_cent_d.jpg')),
+      p5.loadImage(require('~/assets/images/joe.cool.jpeg')),
+      p5.loadImage(require('~/assets/images/black.square.jpeg'))
+    ]
+    ditherTemplates = [
+      p5.loadImage(require('~/assets/dithers/4x28.png')),
+      p5.loadImage(require('~/assets/dithers/4x36.png')),
+      p5.loadImage(require('~/assets/dithers/4x68.png')),
+      p5.loadImage(require('~/assets/dithers/6x42 LINES.png')),
+      p5.loadImage(require('~/assets/dithers/5x30 CIRCLES.png')),
+      p5.loadImage(require('~/assets/dithers/5x30 CIRCUITS.png')),
+      p5.loadImage(require('~/assets/dithers/5x45 DiagLines.png'))
+    ];
   }
 
   let canvas
-  let backgroundStorage
-  let tempLayer
   let layers
 
   p5.setup = () => {
@@ -34,6 +47,7 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
     canvas = p5.createCanvas(params.width, params.height)
     canvas.drop(gotFile)
     canvas.parent('#sketch-holder')
+    dithers = ditherTemplates.map(dt => new dither(dt))
     layers = new Layers(p5)
     layers.imageReady(params.img)
     p5.noLoop()
@@ -104,6 +118,62 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
     } else if (p5.key === 'h') {
       const img = layers.storageLayer.get()
       halftoner({ img, pattern: params.halftonePattern, threshold: params.threshold, angle: params.halftoneAngle, size: params.halftoneSize })
+    } else if (p5.key === 'p') {
+      const img = layers.storageLayer.get()
+      photoDither(img)
+    }
+  }
+
+  const photoDither = (img) => {
+    img.loadPixels()
+    p5.background(0);  //The darker color
+    p5.fill(255);      //The lighter color
+    const width = img.width
+    const height = img.height
+
+    const pxSize = 5;
+    for (let x = 0; x < width; x += pxSize) {
+      for (let y = 0; y < height; y += pxSize) {
+        // TODO: pick from color
+        // const colorToSend = color(noise(x / 150, y / 150, cos(frameCount / 10)) * 256);
+
+        const targPixel = (x * y)
+        let r = img.pixels[targPixel]
+        let g = img.pixels[targPixel + 1]
+        let b = img.pixels[targPixel + 2]
+
+        const colorToSend = p5.color(r, g, b)
+        const brightness = p5.brightness(colorToSend)
+        if (ditherColor(brightness, x / pxSize, y / pxSize)) {
+          p5.square(x, y, pxSize);
+        }
+      }
+    }
+  }
+
+  function dither(img) {
+    this.image = img;
+    this.width = this.image.width;
+    this.steps = this.image.height / this.width;
+    this.image.loadPixels();
+    //console.log(this.file + ", " + this.image + ", " + this.width + ", " + this.steps);
+  }
+  
+  // TODO: scope out the dithers array to be local (or passed in)
+  
+  function ditherColor(brightness, x1, y1) {
+    let currentDither = 1
+    var mX = x1 % dithers[currentDither].width;
+    var mY = y1 % dithers[currentDither].width;
+    var level = p5.ceil(p5.map(brightness, 0, 100, dithers[currentDither].steps, 0));
+  
+    var newColor = dithers[currentDither].image.get(mX, mY + (level - 1) * dithers[currentDither].width);
+  
+    if (newColor.toString('#rrggbb') == "255,255,255,255") {
+      return true;
+    }
+    else {
+      return false;
     }
   }
 

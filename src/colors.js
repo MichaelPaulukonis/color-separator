@@ -127,4 +127,4 @@ export const named = {
   BURGUNDY: [145, 78, 114]
 }
 
-export const allColors = { ...neons, ...named }
+export const allColors = { ...named, ...neons }

@@ -50,6 +50,8 @@ and it's [example sketch](https://github.com/antiboredom/p5.riso/blob/master/tut
 - https://stackoverflow.com/questions/39174195/how-to-re-tint-a-grayscale-image-on-canvas - global compositing 
 - https://surma.dev/things/ditherpunk/
 
+- [potrace](https://github.com/kilobtye/potrace/blob/master/potrace.js) has simple image-to-bitmap code (works well on the SLuggo MINE! for example)
+ - it's possible the tracing does the best cleanup, however
 
 ## anything that is different
 

@@ -1,7 +1,7 @@
 <template lang="pug">
 .control-panel
   h2.control-title Image Processing Controls
-  
+
   .control-section
     h3.section-title Color Settings
     dat-gui(close-text="Close controls", open-text="Open controls", close-position="bottom")
@@ -10,14 +10,14 @@
         dat-number.control-item(v-model="threshold", :min="-0", :max="255", :step="1", label="Threshold")
         dat-select.control-item(v-model="renderColor" :items="colors" label="Render color")
         dat-select.control-item(v-model="channel" :items="channels" label="Channel")
-      
+
       .control-group
         h4.group-label Dithering & Halftone
         dat-select.control-item(v-model="ditherType" :items="ditherTypes" label="Dither type")
         dat-select.control-item(v-model="halftonePattern" :items="halftonePatterns" label="Halftone pattern")
         dat-number.control-item(v-model="halftoneSize", :min="3", :max="100", :step="1", label="Halftone size")
         dat-number.control-item(v-model="halftoneAngle", :min="0", :max="180", :step="1", label="Halftone angle")
-      
+
       .control-group
         h4.group-label Color Selection
         dat-color.control-item(v-model="targetColor" label="Target color")
@@ -31,6 +31,10 @@ const dithers = [ 'none', 'bayer', 'floydsteinberg', 'Atkinson' ]
 
 const halftones = [ 'line', 'square', 'circle', 'ellipse', 'cross' ]
 
+// absolute positioning for dat-gui
+// document.getElementsByClassName('dg ac')[0].style.top = '150px';
+// document.getElementsByClassName('dg ac')[0].style.right = '150px';
+
 export default {
   props: {
     threshold: Number,
@@ -43,7 +47,7 @@ export default {
     return {
       colors: Object.keys(allColors).map(c => ({ name: c, value: c })),
       renderColor: Object.keys(allColors)[0],
-      targetColor: 'rgb(53,196,73)', 
+      targetColor: 'rgb(53,196,73)',
       ditherTypes: dithers.map(d => ({ name: d, value: d})),
       ditherType: dithers[0],
       halftonePatterns: halftones.map(d => ({ name: d, value: d})),

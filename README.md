@@ -60,6 +60,17 @@ and it's [example sketch](https://github.com/antiboredom/p5.riso/blob/master/tut
 - LUTs <https://nick-shaw.github.io/cinematiccolor/luts-and-transforms.html>
 - <https://threejs.org/docs/#examples/en/math/Lut>
 - <https://www.emanueleferonato.com/2018/06/09/playing-with-javascript-photos-and-3d-luts-lookup-tables/> - from p5.riso.js
+- <https://rangdo.github.io/graphics/2018/09/25/speccy-vision.html> WOO-HOO LOVELY!
+- <https://github.com/mcychan/PnnQuant.js>
+- <https://github.com/andrewstephens75/as-dithered-image>
+- <https://github.com/kamoroso94/ordered-dither>
+- <https://github.com/MichaelPaulukonis/ditherme>
+- <https://github.com/MichaelPaulukonis/halftone-palette>
+- <https://chalier.fr/blog/halftone-palette> - updated 4 months ago
+  - which cites [Kodak](https://workflowhelp.kodak.com/display/EVO81/Tell+me+more+about+dot+shapes)]
+- <https://github.com/cdastangoo/Mosaic-Quilt>
+- <https://github.com/constraint-systems/pal>
+
 
 ## web workers
 

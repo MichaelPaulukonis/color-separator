@@ -5,7 +5,7 @@ import Layers from './layers'
 
 let namer = null
 
-export default function Sketch({ p5Instance: p5, p5Object, params }) {
+export default function Sketch ({ p5Instance: p5, p5Object, params }) {
   const colorSep = {}
   const density = 1 // halftone (and other riso funcs) don't work with 2 NO IDEA
   let ditherTemplates = []
@@ -13,7 +13,7 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
   let images = []
 
   p5.preload = () => {
-    params.img = p5.loadImage(require('~/assets/images/Rain_blo_1_cent_d.jpg'))
+    params.img = p5.loadImage(require('~/assets/images/small.cmyk.png'))
 
     // drop-down with ALL local sample images ???
     images = [
@@ -33,7 +33,7 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
       p5.loadImage(require('~/assets/dithers/5x30 CIRCLES.png')),
       p5.loadImage(require('~/assets/dithers/5x30 CIRCUITS.png')),
       p5.loadImage(require('~/assets/dithers/5x45 DiagLines.png'))
-    ];
+    ]
   }
 
   let canvas
@@ -53,20 +53,20 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
     p5.noLoop()
   }
 
-  var getScale = (image) => {
+  const getScale = (image) => {
     const displayLarge = { width: 800, height: 800 }
     const displaySmall = { width: 200, height: 200 }
 
     const ratio = (img, display) => {
       const widthRatio = display.width / img.width
       const heightRatio = display.height / img.height
-      return Math.min(widthRatio, heightRatio);
+      return Math.min(widthRatio, heightRatio)
     }
 
     let r = ratio(image, displayLarge)
     if (r > 3) r = ratio(image, displaySmall)
 
-    return r;
+    return r
   }
 
   const gotFile = (file) => {
@@ -126,54 +126,54 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
 
   const photoDither = (img) => {
     img.loadPixels()
-    p5.background(0);  //The darker color
-    p5.fill(255);      //The lighter color
+    layers.tempLayer.background(0) // The darker color
+    layers.tempLayer.fill(255) // The lighter color
     const width = img.width
     const height = img.height
 
-    const pxSize = 5;
+    const pxSize = 5
     for (let x = 0; x < width; x += pxSize) {
       for (let y = 0; y < height; y += pxSize) {
         // TODO: pick from color
         // const colorToSend = color(noise(x / 150, y / 150, cos(frameCount / 10)) * 256);
 
         const targPixel = (x * y)
-        let r = img.pixels[targPixel]
-        let g = img.pixels[targPixel + 1]
-        let b = img.pixels[targPixel + 2]
+        const red = img.pixels[targPixel]
+        const green = img.pixels[targPixel + 1]
+        const blue = img.pixels[targPixel + 2]
 
-        const colorToSend = p5.color(r, g, b)
-        const brightness = p5.brightness(colorToSend)
-        if (ditherColor(brightness, x / pxSize, y / pxSize)) {
-          p5.square(x, y, pxSize);
+        const shade = 0.2126 * red + 0.7152 * green + 0.0722 * blue
+
+        // const colorToSend = p5.color(red, green, blue)
+        // const brightness = p5.brightness(colorToSend)
+        if (ditherColor(shade, x / pxSize, y / pxSize)) {
+          layers.tempLayer.square(x, y, pxSize)
         }
       }
     }
+    layers.render(layers.tempLayer)
   }
 
-  function dither(img) {
-    this.image = img;
-    this.width = this.image.width;
-    this.steps = this.image.height / this.width;
-    this.image.loadPixels();
-    //console.log(this.file + ", " + this.image + ", " + this.width + ", " + this.steps);
+  function dither (img) {
+    this.image = img
+    this.width = this.image.width
+    this.steps = this.image.height / this.width
+    this.image.loadPixels()
+    // console.log(this.file + ", " + this.image + ", " + this.width + ", " + this.steps);
   }
-  
-  // TODO: scope out the dithers array to be local (or passed in)
-  
-  function ditherColor(brightness, x1, y1) {
-    let currentDither = 1
-    var mX = x1 % dithers[currentDither].width;
-    var mY = y1 % dithers[currentDither].width;
-    var level = p5.ceil(p5.map(brightness, 0, 100, dithers[currentDither].steps, 0));
-  
-    var newColor = dithers[currentDither].image.get(mX, mY + (level - 1) * dithers[currentDither].width);
-  
-    if (newColor.toString('#rrggbb') == "255,255,255,255") {
-      return true;
-    }
-    else {
-      return false;
+
+  function ditherColor (brightness, x1, y1) {
+    const currentDither = 4
+    const mX = x1 % dithers[currentDither].width
+    const mY = y1 % dithers[currentDither].width
+    const level = p5.ceil(p5.map(brightness, 0, 255, dithers[currentDither].steps, 0))
+
+    const newColor = dithers[currentDither].image.get(mX, mY + (level - 1) * dithers[currentDither].width)
+
+    if (newColor.toString('#rrggbb') == '255,255,255,255') {
+      return true
+    } else {
+      return false
     }
   }
 
@@ -267,7 +267,7 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
   }
 
   // from https://stackoverflow.com/a/52453462/41153
-  function deltaE(rgbA, rgbB) {
+  function deltaE (rgbA, rgbB) {
     const labA = rgb2lab(rgbA)
     const labB = rgb2lab(rgbB)
     const deltaL = labA[0] - labB[0]
@@ -287,7 +287,7 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
     return i < 0 ? 0 : Math.sqrt(i)
   }
 
-  function rgb2lab(rgb) {
+  function rgb2lab (rgb) {
     let r = rgb[0] / 255; let g = rgb[1] / 255; let b = rgb[2] / 255; let x; let y; let z
     r = (r > 0.04045) ? Math.pow((r + 0.055) / 1.055, 2.4) : r / 12.92
     g = (g > 0.04045) ? Math.pow((g + 0.055) / 1.055, 2.4) : g / 12.92
@@ -471,7 +471,7 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
   // channel can be a number, a name, or a string of channels like 'cy' or 'cmk'
   // NOTE: this goes to black, not the target color
   // NOTE: the black extraction might work better in the other method. !!!
-  function extractCMYKChannelRiso(img, c) {
+  function extractCMYKChannelRiso (img, c) {
     const desiredCMYKChannels = []
     if (typeof c === 'number' && c < 4) {
       desiredCMYKChannels.push(c)
@@ -583,7 +583,7 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
   colorSep.savit = savit
 
   class Riso extends p5Object.Graphics {
-    constructor(channelColor, w, h, p5) {
+    constructor (channelColor, w, h, p5) {
       if (!w) w = p5.width
       if (!h) h = p5.height
 
@@ -617,22 +617,22 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
       Riso.channels.push(this)
     }
 
-    cutout(imageMask) {
+    cutout (imageMask) {
       const img = this.get()
       img.cutout(imageMask)
       this.clear()
       this.copy(img, 0, 0, this.width, this.height, 0, 0, img.width, img.height)
     }
 
-    stroke(c) {
+    stroke (c) {
       this._stroke(this.channelColor[0], this.channelColor[1], this.channelColor[2], c)
     }
 
-    fill(c) {
+    fill (c) {
       this._fill(this.channelColor[0], this.channelColor[1], this.channelColor[2], c)
     }
 
-    image(img, x, y, w, h) {
+    image (img, x, y, w, h) {
       const alphaValue = p5.alpha(this.drawingContext.fillStyle) / 255
       const newImage = p5.createImage(img.width, img.height)
       img.loadPixels()
@@ -653,12 +653,12 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
       return newImage
     }
 
-    draw() {
+    draw () {
       layers.tempLayer.image(this, 0, 0)
     }
   }
 
-  function drawRiso() {
+  function drawRiso () {
     layers.tempLayer.background('white')
     layers.tempLayer.blendMode(p5.MULTIPLY)
     Riso.channels.forEach(c => c.draw())
@@ -666,38 +666,38 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
     layers.render(layers.tempLayer)
   }
 
-  function clearRiso() {
+  function clearRiso () {
     Riso.channels.forEach(c => c.clear())
   }
 
-  function risoNoFill() {
+  function risoNoFill () {
     Riso.channels.forEach(c => c.noFill())
   }
 
-  function risoNoStroke() {
+  function risoNoStroke () {
     Riso.channels.forEach(c => c.noStroke())
   }
 
   const halftonePatterns = {
-    line(c, x, y, g, d) {
+    line (c, x, y, g, d) {
       c.rect(x, y, g, g * d)
     },
-    square(c, x, y, g, d) {
+    square (c, x, y, g, d) {
       c.rect(x, y, g * d, g * d)
     },
-    circle(c, x, y, g, d) {
+    circle (c, x, y, g, d) {
       c.ellipse(x, y, d * g, d * g)
     },
-    ellipse(c, x, y, g, d) {
+    ellipse (c, x, y, g, d) {
       c.ellipse(x, y, g * d * 0.7, g * d)
     },
-    cross(c, x, y, g, d) {
+    cross (c, x, y, g, d) {
       c.rect(x, y, g, g * d)
       c.rect(x, y, g * d, g)
     }
   }
 
-  function halftoneImage(img, shape, gridSize, angle, threshold) {
+  function halftoneImage (img, shape, gridSize, angle, threshold) {
     if (shape === undefined) shape = 'circle'
     if (gridSize === undefined) gridSize = 10
     if (angle === undefined) angle = 45
@@ -732,11 +732,11 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
       for (let y = 0; y < h * 2; y += gridSize) {
         const targPixel = (x + y * w * 2) * 4
 
-        let r = rotatedCanvas.pixels[targPixel]
-        let g = rotatedCanvas.pixels[targPixel + 1]
-        let b = rotatedCanvas.pixels[targPixel + 2]
+        const r = rotatedCanvas.pixels[targPixel]
+        const g = rotatedCanvas.pixels[targPixel + 1]
+        const b = rotatedCanvas.pixels[targPixel + 2]
 
-        let luma = (0.299 * r + 0.587 * g + 0.114 * b)
+        const luma = (0.299 * r + 0.587 * g + 0.114 * b)
         if (luma < 255) {
           const darkness = (255 - luma) / 255
           patternFunction(out, x, y, gridSize, darkness)
@@ -761,7 +761,7 @@ export default function Sketch({ p5Instance: p5, p5Object, params }) {
     }
   }
 
-  function halftoneImageRiso(img, shape, frequency, angle, intensity) {
+  function halftoneImageRiso (img, shape, frequency, angle, intensity) {
     if (shape === undefined) shape = 'circle'
     if (frequency === undefined) frequency = 10
     if (angle === undefined) angle = 45

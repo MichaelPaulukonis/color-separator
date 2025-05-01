@@ -13,7 +13,7 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
   let images = []
 
   p5.preload = () => {
-    params.img = p5.loadImage(require('~/assets/images/Rain_blo_1_cent_d.jpg'))
+    params.img = p5.loadImage(require('~/assets/images/small.cmyk.png'))
 
     // drop-down with ALL local sample images ???
     images = [
@@ -126,8 +126,8 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
 
   const photoDither = (img) => {
     img.loadPixels()
-    p5.background(0) // The darker color
-    p5.fill(255) // The lighter color
+    layers.tempLayer.background(0) // The darker color
+    layers.tempLayer.fill(255) // The lighter color
     const width = img.width
     const height = img.height
 
@@ -138,17 +138,20 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
         // const colorToSend = color(noise(x / 150, y / 150, cos(frameCount / 10)) * 256);
 
         const targPixel = (x * y)
-        const r = img.pixels[targPixel]
-        const g = img.pixels[targPixel + 1]
-        const b = img.pixels[targPixel + 2]
+        const red = img.pixels[targPixel]
+        const green = img.pixels[targPixel + 1]
+        const blue = img.pixels[targPixel + 2]
 
-        const colorToSend = p5.color(r, g, b)
-        const brightness = p5.brightness(colorToSend)
-        if (ditherColor(brightness, x / pxSize, y / pxSize)) {
-          p5.square(x, y, pxSize)
+        const shade = 0.2126 * red + 0.7152 * green + 0.0722 * blue
+
+        // const colorToSend = p5.color(red, green, blue)
+        // const brightness = p5.brightness(colorToSend)
+        if (ditherColor(shade, x / pxSize, y / pxSize)) {
+          layers.tempLayer.square(x, y, pxSize)
         }
       }
     }
+    layers.render(layers.tempLayer)
   }
 
   function dither (img) {

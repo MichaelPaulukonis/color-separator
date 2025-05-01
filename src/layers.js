@@ -1,9 +1,9 @@
 import Undo from './undo.js'
 
 export default class Layers {
-  constructor(p5Object, sl = null, temp = null) {
+  constructor (p5Object, sl = null, temp = null) {
     this.p5Object = p5Object
-    this.storageLayer = sl   // p5.Graphics, full-size
+    this.storageLayer = sl // p5.Graphics, full-size
     this.tempLayer = temp
     this.ratio = 1
     this.history = new Undo(this.renderRaw, 10)
@@ -16,15 +16,14 @@ export default class Layers {
     const ratio = (img, display) => {
       const widthRatio = display.width / img.width
       const heightRatio = display.height / img.height
-      return Math.min(widthRatio, heightRatio);
+      return Math.min(widthRatio, heightRatio)
     }
 
     let r = ratio(image, displayLarge)
     if (r > 3) r = ratio(image, displaySmall)
 
-    return r;
+    return r
   }
-
 
   // snapshot-free
   renderRaw = (img) => {
@@ -55,7 +54,7 @@ export default class Layers {
   /**
    * Returns a p5.Graphics object that is a copy of the current drawing
    */
-  copy() {
+  copy () {
     const layer = this.p5Object.createGraphics(this.p5Object.width, this.p5Object.height)
     layer.pixelDensity(this.p5Object.pixelDensity())
     layer.image(this.p5Object, 0, 0)
@@ -65,7 +64,7 @@ export default class Layers {
   /**
    * Returns a p5.Graphics object that is a copy of the image passed in
    */
-  clone(img) {
+  clone (img) {
     const g = this.p5Object.createGraphics(img.width, img.height)
     g.pixelDensity(this.p5Object.pixelDensity())
     g.image(img, 0, 0)

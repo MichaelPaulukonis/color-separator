@@ -1,14 +1,27 @@
 <template lang="pug">
-dat-gui(close-text="Close controls", open-text="Open controls", close-position="bottom")
-  dat-number(v-model="threshold", :min="-0", :max="255", :step="1", label="Threshold")
-  dat-select(v-model="renderColor" :items="colors" label="Render color")
-  dat-select(v-model="ditherType" :items="ditherTypes" label="Dither type")
-  dat-select(v-model="halftonePattern" :items="halftonePatterns" label="Halftone pattern")
-  dat-number(v-model="halftoneSize", :min="3", :max="100", :step="1", label="halftone size")
-  dat-number(v-model="halftoneAngle", :min="0", :max="180", :step="1", label="halftone angle")
-  dat-select(v-model="channel" :items="channels" label="Channel")
-  dat-color(v-model="targetColor" label="target color")
-  dat-color(v-model="eyedropper" label="eyedropper")
+.control-panel
+  h2.control-title Image Processing Controls
+  
+  .control-section
+    h3.section-title Color Settings
+    dat-gui(close-text="Close controls", open-text="Open controls", close-position="bottom")
+      .control-group
+        h4.group-label Basic Settings
+        dat-number.control-item(v-model="threshold", :min="-0", :max="255", :step="1", label="Threshold")
+        dat-select.control-item(v-model="renderColor" :items="colors" label="Render color")
+        dat-select.control-item(v-model="channel" :items="channels" label="Channel")
+      
+      .control-group
+        h4.group-label Dithering & Halftone
+        dat-select.control-item(v-model="ditherType" :items="ditherTypes" label="Dither type")
+        dat-select.control-item(v-model="halftonePattern" :items="halftonePatterns" label="Halftone pattern")
+        dat-number.control-item(v-model="halftoneSize", :min="3", :max="100", :step="1", label="Halftone size")
+        dat-number.control-item(v-model="halftoneAngle", :min="0", :max="180", :step="1", label="Halftone angle")
+      
+      .control-group
+        h4.group-label Color Selection
+        dat-color.control-item(v-model="targetColor" label="Target color")
+        dat-color.control-item(v-model="eyedropper" label="Eyedropper")
 </template>
 
 <script>
@@ -80,7 +93,70 @@ export default {
 </script>
 
 <style scoped>
+.control-panel {
+  width: 100%;
+  overflow: hidden;
+}
+
+.control-title {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: #333;
+  text-align: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #ddd;
+}
+
+.section-title {
+  font-size: 1rem;
+  margin: 1rem 0 0.5rem;
+  color: #555;
+}
+
+.control-group {
+  margin-bottom: 1.5rem;
+  padding: 0.8rem;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 4px;
+  border-left: 3px solid #8a2be2;
+}
+
+.group-label {
+  font-size: 0.9rem;
+  margin-bottom: 0.8rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.control-item {
+  margin-bottom: 0.5rem;
+}
+
 ul > li {
   margin-bottom: 0;
+}
+
+/* Enhance dat-gui styling with custom colors */
+:deep(.dg.main) {
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+:deep(.dg.main .close-button) {
+  background-color: #8a2be2;
+  color: white;
+}
+
+:deep(.dg.main .close-button:hover) {
+  background-color: #7a1dd2;
+}
+
+:deep(.dg.main .property-name) {
+  font-weight: 500;
+}
+
+:deep(.dg li:not(.folder)) {
+  border-bottom: 1px solid #eee;
 }
 </style>

@@ -1,35 +1,42 @@
 <template lang="pug">
 #app
-  #title color separator
+  header.app-header
+    #title COLOR SEPARATOR
+    .action-buttons
+      button.btn(@click="help") 
+        i.icon &#9432;
+        | Help
+      button.btn(@click="about") 
+        i.icon &#8505;
+        | About
 
-  modal(name="about")
+  .main-content
+    .canvas-container
+      #sketch-holder
+        // Our sketch will go here!
+      noscript
+        p JavaScript is required to view the contents of this page.
+      button.focus-btn(@click="setFocus") Focus Canvas
+
+    .controls-container
+      DataGui(
+        :threshold="params.threshold"
+        :eyedropperIn="params.eyedropper"
+        @updateThreshold="params.threshold = $event"
+        @updateDither="params.ditherType = $event"
+        @updateHalftone="params.halftonePattern = $event"
+        @updateHalftoneSize="params.halftoneSize = $event"
+        @updateHalftoneAngle="params.halftoneAngle = $event"
+        @updateColor="params.color = $event"
+        @updateChannel="params.channel = $event"
+        @updateExtractColor="params.extractColor = $event"
+      )
+
+  modal(name="about" :scrollable="true" height="auto" width="500px")
     About
 
-  modal(name="help" height="auto" :draggable="true")
+  modal(name="help" height="auto" width="500px" :scrollable="true" :draggable="true")
     Help
-
-  DataGui(
-    :threshold="params.threshold"
-    :eyedropperIn="params.eyedropper"
-    @updateThreshold="params.threshold = $event"
-    @updateDither="params.ditherType = $event"
-    @updateHalftone="params.halftonePattern = $event"
-    @updateHalftoneSize="params.halftoneSize = $event"
-    @updateHalftoneAngle="params.halftoneAngle = $event"
-    @updateColor="params.color = $event"
-    @updateChannel="params.channel = $event"
-    @updateExtractColor="params.extractColor = $event"
-  )
-
-  button#focus(@click="setFocus") focus on canvas
-  button(@click="help") help
-  button(@click="about") About
-
-  div
-    #sketch-holder
-      // Our sketch will go here!
-    noscript
-      p JavaScript is required to view the contents of this page.
   
 </template>
 
@@ -106,23 +113,111 @@ export default {
 </script>
 
 <style scoped>
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: #222;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
 #title {
   background: linear-gradient(90deg, #f0f, #ff0);
-  line-height: 1.5em;
-  font-weight: 600;
-  width: 25vw;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2em;
+  font-weight: 700;
   letter-spacing: 0.1em;
-  margin-bottom: 1em;
+  font-size: 1.8em;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn:hover {
+  background-color: #555;
+}
+
+.icon {
+  margin-right: 8px;
+  font-style: normal;
+}
+
+.main-content {
+  display: flex;
+  flex-wrap: wrap;
   padding: 1rem;
-  font-size: 1.65em;
+  gap: 20px;
 }
 
-#bodycopy {
-  width: 100%;
-  height: 90%;
+.canvas-container {
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f5f5f5;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.text-controls {
-  float: right;
+.controls-container {
+  width: 300px;
+  background-color: #f5f5f5;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.focus-btn {
+  margin-top: 1rem;
+  padding: 8px 16px;
+  background-color: #4a5568;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.focus-btn:hover {
+  background-color: #2d3748;
+}
+
+/* Responsive layout */
+@media (max-width: 768px) {
+  .main-content {
+    flex-direction: column;
+  }
+  
+  .controls-container {
+    width: 100%;
+  }
 }
 </style>

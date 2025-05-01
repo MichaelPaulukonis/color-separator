@@ -15,6 +15,8 @@ html {
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
   box-sizing: border-box;
+  background-color: #f0f2f5;
+  color: #333;
 }
 
 *,
@@ -24,6 +26,20 @@ html {
   margin: 0;
 }
 
+body {
+  min-height: 100vh;
+  padding: 0;
+  margin: 0;
+}
+
+button, 
+input, 
+select, 
+textarea {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
 .button--green {
   display: inline-block;
   border-radius: 4px;
@@ -31,11 +47,14 @@ html {
   color: #3b8070;
   text-decoration: none;
   padding: 10px 30px;
+  transition: all 0.3s ease;
 }
 
 .button--green:hover {
   color: #fff;
   background-color: #3b8070;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .button--grey {
@@ -46,10 +65,25 @@ html {
   text-decoration: none;
   padding: 10px 30px;
   margin-left: 15px;
+  transition: all 0.3s ease;
 }
 
 .button--grey:hover {
   color: #fff;
   background-color: #35495e;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Modal styling improvements */
+.vm--overlay {
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(2px);
+}
+
+.vm--modal {
+  border-radius: 8px !important;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3) !important;
+  padding: 1.5rem !important;
 }
 </style>

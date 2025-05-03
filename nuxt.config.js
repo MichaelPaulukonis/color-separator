@@ -40,7 +40,6 @@ export default {
   */
   plugins: [
     '~plugins/vue-js-modal',
-    '~plugins/vue-dat-gui',
     { src: '~/plugins/setFocus', ssr: false }
   ],
   /*

@@ -108,6 +108,8 @@ export default {
 #helpbox {
   margin: 20px;
   max-width: 600px;
+  max-height: 70vh;
+  overflow-y: auto;
 }
 
 .key {

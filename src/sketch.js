@@ -121,6 +121,9 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
     } else if (p5.key === 'p') {
       const img = layers.storageLayer.get()
       photoDither(img)
+    } else if (p5.key === '?') {
+      // Show help modal
+      window.$nuxt.$modal.show('help')
     }
   }
 

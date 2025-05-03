@@ -1,4 +1,7 @@
-import Vue from 'vue'
-import VModal from 'vue-js-modal/dist/ssr.index'
+import { defineNuxtPlugin } from '#app'
+import { createVueJsModal } from 'vue-js-modal'
 
-Vue.use(VModal)
+export default defineNuxtPlugin(nuxtApp => {
+  const modal = createVueJsModal()
+  nuxtApp.vueApp.use(modal)
+})

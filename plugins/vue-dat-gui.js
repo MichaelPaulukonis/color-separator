@@ -1,4 +1,6 @@
-import Vue from 'vue'
+import { defineNuxtPlugin } from '#app'
 import DatGui from '@cyrilf/vue-dat-gui'
 
-Vue.use(DatGui)
+export default defineNuxtPlugin(nuxtApp => {
+  nuxtApp.vueApp.use(DatGui)
+})

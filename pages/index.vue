@@ -40,75 +40,66 @@
   
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from 'vue'
 import P5 from 'p5/lib/p5'
 window.p5 = P5
-import VModal from 'vue-js-modal'
+import { useModal } from 'vue-js-modal'
 import Help from '@/components/help'
 import About from '@/components/about'
 import NativeControls from '@/components/NativeControls.vue'
 
 import Sketch from '@/src/sketch.js'
 
-export default {
-  components: {
-    NativeControls,
-    VModal,
-    Help,
-    About
-  },
-  data() {
-    return {
-      currentText: 'placeholder',
-      colorSep: {},
-      textManager: {},
-      params: {
-        ditherType: 'none',
-        halftonePattern: 'circle',
-        halftoneSize: 5,
-        halftoneAngle: 45,
-        threshold: 80,
-        color: [255, 72, 176],
-        channel: 'blue',
-        extractColor: 'rgba(3, 23, 6, 1)',
-        eyedropper: 'rgb(255,255,255)'
-      }
-    }
-  },
-  mounted() {
-    this.params = {
-      ...this.params,
-      width: 500,
-      height: 500,
-      currChannel: '',
-      img: null,
-      imageLoaded: false,
-      ratio: 1
-    }
+const modal = useModal()
+const currentText = ref('placeholder')
+const colorSep = ref({})
+const params = ref({
+  ditherType: 'none',
+  halftonePattern: 'circle',
+  halftoneSize: 5,
+  halftoneAngle: 45,
+  threshold: 80,
+  color: [255, 72, 176],
+  channel: 'blue',
+  extractColor: 'rgba(3, 23, 6, 1)',
+  eyedropper: 'rgb(255,255,255)'
+})
 
-    const builder = (p5Instance) => {
-      window._p5Instance = p5Instance
-      const colorSep = new Sketch({ p5Instance, p5Object: P5, params: this.params }) // eslint-disable-line no-new
-      this.colorSep = colorSep
-    }
-
-    new P5(builder, 'sketch-holder') // eslint-disable-line no-new
-
-  },
-  methods: {
-    setFocus() {
-      this.canvas().focus()
-    },
-    canvas() {
-      return document.getElementsByTagName('canvas')[0]
-    },
-    about() {
-      this.$modal.show('about')
-    },
-    help() {
-      this.$modal.show('help')
-    }
+onMounted(() => {
+  params.value = {
+    ...params.value,
+    width: 500,
+    height: 500,
+    currChannel: '',
+    img: null,
+    imageLoaded: false,
+    ratio: 1
   }
+
+  const builder = (p5Instance) => {
+    window._p5Instance = p5Instance
+    const sketch = new Sketch({ p5Instance, p5Object: P5, params: params.value })
+    colorSep.value = sketch
+  }
+
+  new P5(builder, 'sketch-holder')
+})
+
+function setFocus() {
+  canvas().focus()
+}
+
+function canvas() {
+  return document.getElementsByTagName('canvas')[0]
+}
+
+function about() {
+  modal.show('about')
+}
+
+function help() {
+  modal.show('help')
 }
 </script>
 

@@ -19,8 +19,8 @@
       button.focus-btn(@click="setFocus") Focus Canvas
 
     .controls-container
-      DataGui(
-        :threshold="params.threshold"
+      NativeControls(
+        :thresholdIn="params.threshold"
         :eyedropperIn="params.eyedropper"
         @updateThreshold="params.threshold = $event"
         @updateDither="params.ditherType = $event"
@@ -46,13 +46,13 @@ window.p5 = P5
 import VModal from 'vue-js-modal'
 import Help from '@/components/help'
 import About from '@/components/about'
-import DataGui from '@/components/DataGui.vue'
+import NativeControls from '@/components/NativeControls.vue'
 
 import Sketch from '@/src/sketch.js'
 
 export default {
   components: {
-    DataGui,
+    NativeControls,
     VModal,
     Help,
     About

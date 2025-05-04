@@ -35,7 +35,7 @@
   modal(name="about" :scrollable="true" height="auto" width="500px")
     About
 
-  modal(name="help" height="auto" width="500px" :scrollable="true" :draggable="true")
+  modal(name="help" height="80vh" width="700px" :scrollable="true" :draggable="true")
     Help
   
 </template>

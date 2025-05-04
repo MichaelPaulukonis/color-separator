@@ -8,8 +8,9 @@ div#helpbox
     p This app allows you to separate and manipulate color channels in images. You can extract specific RGB or CMYK channels, apply dithering effects, create halftone patterns, and save your results. Perfect for design work, art projects, or exploring color theory.
 
     h3 Keys
-    #keys(v-for="key in keymap" v-bind:key='key.key')
-        span #[span.key {{ key.keys.join(', ') }} ] {{ key.note }}
+    .key-container
+        .key-item(v-for="key in keymap" v-bind:key='key.key')
+            span #[span.key {{ key.keys.join(', ') }} ] {{ key.note }}
 
     h3 Settings
     p Use the control panel to adjust:
@@ -110,6 +111,9 @@ export default {
   max-width: 600px;
   max-height: 70vh;
   overflow-y: auto;
+  padding-right: 15px;
+  column-count: 2;
+  column-gap: 20px;
 }
 
 .key {
@@ -126,6 +130,7 @@ h2 {
   border-bottom: 2px solid #f0f;
   padding-bottom: 5px;
   margin-bottom: 15px;
+  column-span: all;
 }
 
 h3 {
@@ -145,5 +150,25 @@ li {
 p {
   line-height: 1.5;
   margin-bottom: 10px;
+}
+
+.key-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+  margin-bottom: 15px;
+  break-inside: avoid;
+}
+
+.key-item {
+  margin-bottom: 5px;
+}
+
+h3 {
+  break-inside: avoid;
+}
+
+ul {
+  break-inside: avoid;
 }
 </style>

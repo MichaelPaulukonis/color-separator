@@ -38,6 +38,8 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
 
   let canvas
   let layers
+  let galleryVisible = false
+  let gallerySelectedIndex = 0
 
   p5.setup = () => {
     window._p5Instance = p5
@@ -84,15 +86,100 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
   }
 
   p5.mousePressed = () => {
-    // TODO: get color under mouse
-    // sent to params.eyedropper
-    const rgb = () => p5.int(p5.random(255))
-    params.eyedropper = `rgb(${rgb()},${rgb()},${rgb()})`
+    if (galleryVisible) {
+      // Check if clicking on an image in the gallery
+      const tileSize = 100
+      const padding = 10
+      const rowLength = Math.ceil(Math.sqrt(images.length))
+      const startX = (p5.width - (tileSize * rowLength + padding * (rowLength - 1))) / 2
+      const startY = (p5.height - (tileSize * Math.ceil(images.length / rowLength) + padding * (Math.ceil(images.length / rowLength) - 1))) / 2
+
+      for (let i = 0; i < images.length; i++) {
+        const row = Math.floor(i / rowLength)
+        const col = i % rowLength
+        const x = startX + col * (tileSize + padding)
+        const y = startY + row * (tileSize + padding)
+
+        if (p5.mouseX > x && p5.mouseX < x + tileSize && p5.mouseY > y && p5.mouseY < y + tileSize) {
+          gallerySelectedIndex = i
+
+          if (p5.mouseButton === p5.LEFT) {
+            // Check for double-click
+            const currentTime = p5.millis()
+            if (currentTime - lastClickTime < 300 && lastClickedIndex === i) {
+              // Double-click detected
+              params.img = images[i]
+              galleryVisible = false
+              layers.imageReady(params.img)
+              p5.noLoop()
+            }
+            lastClickTime = currentTime
+            lastClickedIndex = i
+          }
+          p5.loop()
+          return false
+        }
+      }
+    } else {
+      // Original behavior for eyedropper
+      const rgb = () => p5.int(p5.random(255))
+      params.eyedropper = `rgb(${rgb()},${rgb()},${rgb()})`
+    }
   }
+
+  // Variables for tracking double-clicks
+  let lastClickTime = 0
+  let lastClickedIndex = -1
 
   const colorKeys = ['r', 'g', 'b', 'c', 'y', 'm', 'k']
 
+  // Handle special keys (arrow keys, Enter, etc.)
+  p5.keyPressed = () => {
+    if (galleryVisible) {
+      // Gallery navigation controls for special keys
+      if (p5.keyCode === p5.LEFT_ARROW) {
+        gallerySelectedIndex = Math.max(0, gallerySelectedIndex - 1)
+        p5.loop() // redraw to update selection
+        return false
+      } else if (p5.keyCode === p5.RIGHT_ARROW) {
+        gallerySelectedIndex = Math.min(images.length - 1, gallerySelectedIndex + 1)
+        p5.loop() // redraw to update selection
+        return false
+      } else if (p5.keyCode === p5.UP_ARROW) {
+        const rowLength = Math.ceil(Math.sqrt(images.length))
+        gallerySelectedIndex = Math.max(0, gallerySelectedIndex - rowLength)
+        p5.loop()
+        return false
+      } else if (p5.keyCode === p5.DOWN_ARROW) {
+        const rowLength = Math.ceil(Math.sqrt(images.length))
+        gallerySelectedIndex = Math.min(images.length - 1, gallerySelectedIndex + rowLength)
+        p5.loop()
+        return false
+      } else if (p5.keyCode === p5.RETURN || p5.keyCode === p5.ENTER) {
+        // Select current image
+        params.img = images[gallerySelectedIndex]
+        galleryVisible = false
+        layers.imageReady(params.img)
+        p5.noLoop()
+        return false
+      }
+    }
+    return true // Allow the event to be handled by the browser
+  }
+
+  // Handle regular character keys
   p5.keyTyped = () => {
+    if (galleryVisible) {
+      // Gallery navigation controls for character keys
+      if (p5.key === 'G' || p5.key === 'g') {
+        // Close gallery
+        galleryVisible = false
+        p5.noLoop()
+        return false
+      }
+      return false
+    }
+
     if (p5.key === 'u') {
       layers.history.undo()
     } else if (p5.key === 'a') {
@@ -124,6 +211,10 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
     } else if (p5.key === '?') {
       // Show help modal
       window.$nuxt.$modal.show('help')
+    } else if (p5.key === 'G') {
+      // Toggle gallery
+      galleryVisible = true
+      p5.loop() // enable animation for gallery
     }
   }
 
@@ -231,6 +322,51 @@ export default function Sketch ({ p5Instance: p5, p5Object, params }) {
   }
 
   p5.draw = () => {
+    if (galleryVisible) {
+      drawGallery()
+    }
+  }
+
+  const drawGallery = () => {
+    p5.background(50)
+    p5.fill(255)
+    p5.textAlign(p5.CENTER, p5.TOP)
+    p5.textSize(18)
+    p5.text('Select an image', p5.width / 2, 20)
+
+    p5.textSize(12)
+    p5.text('Use arrow keys to navigate, ENTER to select, or double-click', p5.width / 2, 50)
+    p5.text('Press "g" to close gallery', p5.width / 2, 70)
+
+    const tileSize = 100
+    const padding = 10
+    const rowLength = Math.ceil(Math.sqrt(images.length))
+    const startX = (p5.width - (tileSize * rowLength + padding * (rowLength - 1))) / 2
+    const startY = 100
+
+    for (let i = 0; i < images.length; i++) {
+      const row = Math.floor(i / rowLength)
+      const col = i % rowLength
+      const x = startX + col * (tileSize + padding)
+      const y = startY + row * (tileSize + padding)
+
+      // Draw selection highlight
+      if (i === gallerySelectedIndex) {
+        p5.stroke(255, 255, 0)
+        p5.strokeWeight(3)
+        p5.noFill()
+        p5.rect(x - 5, y - 5, tileSize + 10, tileSize + 10)
+      }
+
+      // Draw image thumbnail
+      p5.image(images[i], x, y, tileSize, tileSize)
+
+      // Draw border
+      p5.stroke(200)
+      p5.strokeWeight(1)
+      p5.noFill()
+      p5.rect(x, y, tileSize, tileSize)
+    }
   }
 
   const rgb2cmyk = (r, g, b) => {

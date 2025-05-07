@@ -32,7 +32,7 @@ export default {
   ** Global CSS
   */
   css: [
-    '@/assets/css/main.scss',
+    // '@/assets/css/main.scss',
     '@/assets/css/core.css'
   ],
   /*
